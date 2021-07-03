@@ -12,29 +12,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { Avatar, Button, Card, Title, Paragraph } from 'react-native-paper';
 
-const Home = (navigator) => (
-  <View>
-    <Text>
-      HOME SCREEN
-    </Text>
-    <Button
-      title="Go to User"
-      onPress={() => navigator.navigation.navigate('User')}
-    >User</Button>
-  </View>
-)
-
-const User = (navigator) => (
-  <View>
-    <Text>
-      USER SCREEN
-    </Text>
-    <Button
-      title="Go to home"
-      onPress={() => navigator.navigation.navigate('Home')}
-    >Home</Button>
-  </View>
-)
+import Home from './screens/Home';
+import NewMatch from './screens/NewMatch';
 
 const MyComponent = () => (
  <Appbar.Header style={styles.bottom}>
@@ -50,8 +29,6 @@ const MyComponent = () => (
     />
   </Appbar.Header>
  );
-
-
 
 const LeftContent = props => <Avatar.Icon {...props} icon="folder" />
 
@@ -104,8 +81,8 @@ export default function App() {
     <NavigationContainer>
       <PaperProvider theme={theme}>
         <Stack.Navigator>
-         <Stack.Screen name="User" component={User} />
-         <Stack.Screen name="Home" component={Home} />
+         <Stack.Screen name="Home" component={Home} options={{ title: 'Contador de voley' }}/>
+         <Stack.Screen name="NewMatch" component={NewMatch} />
         </Stack.Navigator>
       </PaperProvider>
     </NavigationContainer>
