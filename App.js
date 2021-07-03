@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { DarkTheme, Provider as PaperProvider } from 'react-native-paper';
+import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
@@ -14,39 +14,6 @@ import { Avatar, Button, Card, Title, Paragraph } from 'react-native-paper';
 
 import Home from './screens/Home';
 import NewMatch from './screens/NewMatch';
-
-const MyComponent = () => (
- <Appbar.Header style={styles.bottom}>
-   <Appbar.Action
-     icon="archive"
-     onPress={() => console.log('Pressed archive')}
-    />
-    <Appbar.Action icon="mail" onPress={() => console.log('Pressed mail')} />
-    <Appbar.Action icon="label" onPress={() => console.log('Pressed label')} />
-    <Appbar.Action
-      icon="delete"
-      onPress={() => console.log('Pressed delete')}
-    />
-  </Appbar.Header>
- );
-
-const LeftContent = props => <Avatar.Icon {...props} icon="folder" />
-
-const CardComponent = () => (
-  <Card>
-    <Card.Title title="Card Title" subtitle="Card Subtitle" left={LeftContent} />
-    <Card.Content>
-      <Title>Card title</Title>
-      <Paragraph>Card content</Paragraph>
-    </Card.Content>
-    <Card.Cover source={{ uri: 'https://picsum.photos/700' }} />
-    <Card.Actions>
-      <Button>Cancel</Button>
-      <Button>Ok</Button>
-    </Card.Actions>
-  </Card> 
-);
-
 
 const AnotherScreen = () => (
   <SafeAreaProvider>
@@ -63,14 +30,11 @@ const AnotherScreen = () => (
   </SafeAreaProvider>
 )
 
-
 const theme = {
-  ...DarkTheme,
+  ...DefaultTheme,
   colors: {
-    ...DarkTheme.colors,
+    ...DefaultTheme.colors,
     primary: 'purple',
-    background: 'black',
-    accent: 'yellow',
   },
 };
 
@@ -78,14 +42,14 @@ const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <PaperProvider theme={theme}>
-        <Stack.Navigator>
-         <Stack.Screen name="Home" component={Home} options={{ title: 'Contador de voley' }}/>
-         <Stack.Screen name="NewMatch" component={NewMatch} />
-        </Stack.Navigator>
-      </PaperProvider>
-    </NavigationContainer>
+    <PaperProvider theme={theme}>
+      <NavigationContainer theme={theme} >
+          <Stack.Navigator>
+           <Stack.Screen name="Home" component={Home} options={{ title: 'Contador de voley' }}/>
+           <Stack.Screen name="NewMatch" component={NewMatch} />
+          </Stack.Navigator>
+      </NavigationContainer>
+    </PaperProvider>
   );
 }
 
