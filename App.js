@@ -14,6 +14,8 @@ import { Avatar, Button, Card, Title, Paragraph } from 'react-native-paper';
 
 import Home from './screens/Home';
 import NewMatch from './screens/NewMatch';
+import ChangeTeamColor from './screens/ChangeTeamColor';
+
 
 const AnotherScreen = () => (
   <SafeAreaProvider>
@@ -34,7 +36,7 @@ const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: 'purple',
+    primary: '#d8358d',
   },
 };
 
@@ -46,7 +48,8 @@ export default function App() {
       <NavigationContainer theme={theme} >
           <Stack.Navigator>
            <Stack.Screen name="Home" component={Home} options={{ title: 'Contador de voley' }}/>
-           <Stack.Screen name="NewMatch" component={NewMatch} />
+           <Stack.Screen name="NewMatch" component={NewMatch} options={{ title: 'Nuevo partido' }}/>
+           <Stack.Screen name="ChangeTeamColor" component={ChangeTeamColor} options={{ title: 'Cambiar color de equipo' }}/>
           </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>
