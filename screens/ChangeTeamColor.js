@@ -40,7 +40,7 @@ class ChangeTeamColor extends Component {
               color={ this.state.team_one_color }
               onColorChange={ (color) => this.handleChangeTeamOneColor(color) }
               hideSliders={true}
-              style={{flex: 1}}
+              style={{flex: 1, paddingBottom: 200}}
             />
           <Button
             style={styles.item}
