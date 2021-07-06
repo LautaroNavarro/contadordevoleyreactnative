@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import { DarkTheme, Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
@@ -14,7 +14,7 @@ import { Avatar, Button, Card, Title, Paragraph } from 'react-native-paper';
 
 import Home from './screens/Home';
 import NewMatch from './screens/NewMatch';
-import ChangeTeamColor from './screens/ChangeTeamColor';
+import Match from './screens/Match';
 
 
 const AnotherScreen = () => (
@@ -33,9 +33,9 @@ const AnotherScreen = () => (
 )
 
 const theme = {
-  ...DefaultTheme,
+  ...DarkTheme,
   colors: {
-    ...DefaultTheme.colors,
+    ...DarkTheme.colors,
     primary: '#d8358d',
   },
 };
@@ -49,7 +49,7 @@ export default function App() {
           <Stack.Navigator>
            <Stack.Screen name="Home" component={Home} options={{ title: 'Contador de voley' }}/>
            <Stack.Screen name="NewMatch" component={NewMatch} options={{ title: 'Nuevo partido' }}/>
-           <Stack.Screen name="ChangeTeamColor" component={ChangeTeamColor} options={{ title: 'Cambiar color de equipo' }}/>
+           <Stack.Screen name="Match" component={Match} options={{ title: 'Partido' }}/>
           </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>

@@ -6,7 +6,7 @@ import { Text, Button, TextInput, RadioButton, Divider } from 'react-native-pape
 
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
-import { ColorPicker } from 'react-native-color-picker'
+import { ColorPicker, fromHsv } from 'react-native-color-picker'
 
 const styles = StyleSheet.create({
   container: {
@@ -46,6 +46,30 @@ class NewMatch extends Component {
 
   handleChangeTeamTwoName(name) {
     this.setState({team_two_name: name})
+  }
+
+  handleCreateMatch() {
+    let team_one_name = this.state.team_one_name
+    let team_two_name = this.state.team_two_name
+
+    if (this.state.team_one_name == '') {
+      team_one_name = 'Equipo A'
+    }
+
+    if (this.state.team_two_name == '') {
+      team_two_name = 'Equipo B'
+    }
+
+    this.props.navigation.navigate(
+      'Match',
+      {
+        team_one_name: team_one_name,
+        team_two_name: team_two_name,
+        team_one_color: fromHsv(this.state.team_one_color),
+        team_two_color: fromHsv(this.state.team_two_color),
+        sets: this.state.sets,
+      }
+    );
   }
 
   render () {
@@ -101,7 +125,7 @@ class NewMatch extends Component {
           <Button
             mode="contained"
             title="Nuevo partido"
-            onPress={() => this.props.navigation.navigate('NewMatch')}
+            onPress={() => this.handleCreateMatch()}
           >Crear partido</Button>
         </View>
       </View>
