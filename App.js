@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { DarkTheme, Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -15,10 +15,6 @@ import { Avatar, Button, Card, Title, Paragraph } from 'react-native-paper';
 import Home from './screens/Home';
 import NewMatch from './screens/NewMatch';
 import Match from './screens/Match';
-
-import { enableScreens } from 'react-native-screens';
-enableScreens(false);
-
 
 const AnotherScreen = () => (
   <SafeAreaProvider>
@@ -50,18 +46,21 @@ const screenStyle = {
 console.log(theme)
 const Stack = createStackNavigator();
 
-export default function App() {
-  return (
-    <PaperProvider theme={theme}>
-      <NavigationContainer theme={theme} >
-          <Stack.Navigator>
-           <Stack.Screen name="Home" component={Home} options={{...screenStyle, title: 'Contador de voley'}}/>
-           <Stack.Screen name="NewMatch" component={NewMatch} options={{...screenStyle, title: 'Nuevo partido' }}/>
-           <Stack.Screen name="Match" component={Match} options={{...screenStyle, title: 'Partido' }}/>
-          </Stack.Navigator>
-      </NavigationContainer>
-    </PaperProvider>
-  );
+class App extends Component {
+
+  render () {
+    return (
+      <PaperProvider theme={theme}>
+        <NavigationContainer theme={theme} >
+            <Stack.Navigator>
+             <Stack.Screen name="Home" component={Home} options={{...screenStyle, title: 'Contador de voley'}}/>
+             <Stack.Screen name="NewMatch" component={NewMatch} options={{...screenStyle, title: 'Nuevo partido' }}/>
+             <Stack.Screen name="Match" component={Match} options={{...screenStyle, title: 'Partido' }}/>
+            </Stack.Navigator>
+        </NavigationContainer>
+      </PaperProvider>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
@@ -79,3 +78,6 @@ const styles = StyleSheet.create({
     right: 0,
   },
 });
+
+
+export default App;
