@@ -16,6 +16,9 @@ import Home from './screens/Home';
 import NewMatch from './screens/NewMatch';
 import Match from './screens/Match';
 
+import { enableScreens } from 'react-native-screens';
+enableScreens(false);
+
 
 const AnotherScreen = () => (
   <SafeAreaProvider>
@@ -40,6 +43,11 @@ const theme = {
   },
 };
 
+const screenStyle = {
+  animationEnabled: false,
+}
+
+console.log(theme)
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -47,9 +55,9 @@ export default function App() {
     <PaperProvider theme={theme}>
       <NavigationContainer theme={theme} >
           <Stack.Navigator>
-           <Stack.Screen name="Home" component={Home} options={{ title: 'Contador de voley' }}/>
-           <Stack.Screen name="NewMatch" component={NewMatch} options={{ title: 'Nuevo partido' }}/>
-           <Stack.Screen name="Match" component={Match} options={{ title: 'Partido' }}/>
+           <Stack.Screen name="Home" component={Home} options={{...screenStyle, title: 'Contador de voley'}}/>
+           <Stack.Screen name="NewMatch" component={NewMatch} options={{...screenStyle, title: 'Nuevo partido' }}/>
+           <Stack.Screen name="Match" component={Match} options={{...screenStyle, title: 'Partido' }}/>
           </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>

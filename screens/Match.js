@@ -6,8 +6,7 @@ import { Text, Button, IconButton, Colors, Modal, Portal } from 'react-native-pa
 
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
-import { ColorPicker } from 'react-native-color-picker'
-
+import MatchSummaryModal from './../components/MatchSummaryModal';
 
 class MatchEngine {
 
@@ -139,11 +138,6 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     marginBottom: hp('1%')
   },
-  modal: {
-    backgroundColor: 'grey',
-    padding: 20,
-    margin: 20,
-  }
 });
 
 class Match extends Component {
@@ -169,6 +163,7 @@ class Match extends Component {
           }
       },
       'winner': null,
+      'dismissModal': false,
     }
 
   substractPointTeam(team) {
@@ -223,23 +218,26 @@ class Match extends Component {
             }
         },
         'winner': null,
+        'dismissModal': false,
       }
       this.match = new MatchEngine(jsonMatch);
       this.setState(this.match.json())
   }
 
-
   getCurrentSet() {
       return this.state.sets[this.state.sets.length - 1];
+  }
+
+  dismissModal() {
+      this.setState({dismissModal: true})
+      this.props.navigation.navigate('Home');
   }
 
   render () {
     return (
       <View>
         <Portal>
-        <Modal visible={this.state.winner != null} onDismiss={() => {}} contentContainerStyle={styles.modal} >
-          <Text>WIP: Add data for each set here</Text>
-        </Modal>
+        {this.state.winner != null ? <MatchSummaryModal visible={!this.state.dismissModal} match={this.state} onDismiss={() => {this.dismissModal()}} /> : null}
         </Portal>
         <View style={styles.container}>
           <View style={styles.item}>
