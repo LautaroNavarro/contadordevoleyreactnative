@@ -16,6 +16,10 @@ import Home from './screens/Home';
 import NewMatch from './screens/NewMatch';
 import Match from './screens/Match';
 
+import { enableScreens } from 'react-native-screens';
+
+enableScreens(false);
+
 const AnotherScreen = () => (
   <SafeAreaProvider>
     <SafeAreaInsetsContext.Consumer>
