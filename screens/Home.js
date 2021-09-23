@@ -6,6 +6,10 @@ import { Text, Button, TextInput } from 'react-native-paper';
 
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
+import {
+  AdMobBanner,
+  setTestDeviceIDAsync,
+} from 'expo-ads-admob';
 
 const styles = StyleSheet.create({
   logo: {
@@ -28,12 +32,22 @@ class Home extends Component {
 
   state = {
     'match_code': '',
+    'displayBanner': false,
   }
 
   handleMatchCodeChange (text) {
     if (text.length <= 6) {
       this.setState({match_code: text});
     }
+  }
+
+  componentDidMount(){
+    this.initAds().catch((error) => console.log(error));
+  }
+
+  initAds = async () => {
+   this.setState({'displayBanner': true});
+   console.log('Displaying banner');
   }
 
   render () {
@@ -61,6 +75,18 @@ class Home extends Component {
             title="Unirse a partido"
             onPress={() => {}}
           >Unirse a partido</Button>
+          {
+            this.state.displayBanner && <>
+            <AdMobBanner
+              bannerSize="fullBanner"
+              adUnitID="ca-app-pub-1559311694967743/5371344310"
+              servePersonalizedAds
+              onDidFailToReceiveAdWithError={(err) => {
+                console.log('Banner error');
+                console.log(err);
+              }} />
+            </>
+          }
         </View>
       </View>
     )

@@ -24,7 +24,10 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#121212"
       },
-      "package": "contadordevoley.online"
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-1559311694967743~9477615444"
+      },
+      "package": "contadordevoley.online",
     },
     "web": {
       "favicon": "./assets/favicon.png"
