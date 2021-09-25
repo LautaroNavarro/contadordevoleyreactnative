@@ -12,6 +12,9 @@ import {
 } from 'expo-ads-admob';
 
 const styles = StyleSheet.create({
+  bigContainer: {
+    height: hp('100%'),
+  },
   logo: {
     width: wp('80%'),
     height: wp('80%'),
@@ -25,6 +28,13 @@ const styles = StyleSheet.create({
   },
   item: {
     marginTop: hp('2%'),
+  },
+  adContainer: {
+    alignItems: 'center',
+    width: wp('100%'),
+    height: 50,
+    bottom: 75,
+    position: 'absolute',
   }
 });
 
@@ -41,6 +51,17 @@ class Home extends Component {
     }
   }
 
+  handleJoinMatch () {
+    this.props.navigation.navigate(
+      'Match',
+      {
+        online: true,
+        token: null,
+        shareId: this.state.match_code,
+      }
+    );
+  }
+
   componentDidMount(){
     this.initAds().catch((error) => console.log(error));
   }
@@ -52,7 +73,7 @@ class Home extends Component {
 
   render () {
     return (
-      <View>
+      <View style={styles.bigContainer}>
         <View style={styles.logoContainer} >
           <Image source={require('./../assets/voley_logo.png')} style={styles.logo} />
         </View>
@@ -73,21 +94,21 @@ class Home extends Component {
             style={styles.item}
             mode="contained"
             title="Unirse a partido"
-            onPress={() => {}}
+            onPress={() => {this.handleJoinMatch()}}
           >Unirse a partido</Button>
+        </View>
           {
-            this.state.displayBanner && <>
+            this.state.displayBanner && <View style={styles.adContainer}>
             <AdMobBanner
-              bannerSize="fullBanner"
+              bannerSize="banner"
               adUnitID="ca-app-pub-1559311694967743/5371344310"
               servePersonalizedAds
               onDidFailToReceiveAdWithError={(err) => {
                 console.log('Banner error');
                 console.log(err);
               }} />
-            </>
+            </View>
           }
-        </View>
       </View>
     )
   }

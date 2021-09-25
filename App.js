@@ -6,19 +6,18 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
 import { Appbar } from 'react-native-paper';
-
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-
 import { Avatar, Button, Card, Title, Paragraph } from 'react-native-paper';
-
 import Home from './screens/Home';
 import NewMatch from './screens/NewMatch';
 import Match from './screens/Match';
-
+import axios from 'axios';
 import { enableScreens } from 'react-native-screens';
 
 enableScreens(false);
+
+axios.defaults.baseURL = 'https://contadordevoleybejs.herokuapp.com/';
 
 const AnotherScreen = () => (
   <SafeAreaProvider>
