@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { DarkTheme, Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
+import { Provider } from 'react-redux';
 
 import { Appbar } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
@@ -14,6 +15,7 @@ import NewMatch from './screens/NewMatch';
 import Match from './screens/Match';
 import axios from 'axios';
 import { enableScreens } from 'react-native-screens';
+import { createStore } from './reducers/root';
 
 enableScreens(false);
 
@@ -46,22 +48,25 @@ const screenStyle = {
   animationEnabled: false,
 }
 
-console.log(theme)
 const Stack = createStackNavigator();
+
+const store = createStore();
 
 class App extends Component {
 
   render () {
     return (
-      <PaperProvider theme={theme}>
-        <NavigationContainer theme={theme} >
-            <Stack.Navigator>
-             <Stack.Screen name="Home" component={Home} options={{...screenStyle, title: 'Contador de voley'}}/>
-             <Stack.Screen name="NewMatch" component={NewMatch} options={{...screenStyle, title: 'Nuevo partido' }}/>
-             <Stack.Screen name="Match" component={Match} options={{...screenStyle, title: 'Partido' }}/>
-            </Stack.Navigator>
-        </NavigationContainer>
+      <Provider store={store}>
+        <PaperProvider theme={theme}>
+          <NavigationContainer theme={theme} >
+              <Stack.Navigator>
+               <Stack.Screen name="Home" component={Home} options={{...screenStyle, title: 'Contador de voley'}}/>
+               <Stack.Screen name="NewMatch" component={NewMatch} options={{...screenStyle, title: 'Nuevo partido' }}/>
+               <Stack.Screen name="Match" component={Match} options={{...screenStyle, title: 'Partido' }}/>
+              </Stack.Navigator>
+          </NavigationContainer>
       </PaperProvider>
+      </Provider>
     );
   }
 }

@@ -1,7 +1,6 @@
-import React, { Component } from 'react';
-
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { StyleSheet, Image, View } from 'react-native';
-
 import { Text, Button, TextInput } from 'react-native-paper';
 
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -38,80 +37,77 @@ const styles = StyleSheet.create({
   }
 });
 
-class Home extends Component {
+const Home = ({navigation}) => {
 
-  state = {
-    'match_code': '',
-    'displayBanner': false,
+  const dispatch = useDispatch();
+  const [matchCode, setMatchCode] = useState('');
+  const [displayBanner, setDisplayBanner] = useState(false);
+
+  const initAds = async () => {
+    setDisplayBanner(true);
+    console.log('Displaying banner');
   }
 
-  handleMatchCodeChange (text) {
+  useEffect(() => {
+    initAds().catch((error) => console.log(error));
+  }, []);
+
+  const handleMatchCodeChange = (text) => {
     if (text.length <= 6) {
-      this.setState({match_code: text});
+      setMatchCode(text);
     }
   }
 
-  handleJoinMatch () {
-    this.props.navigation.navigate(
+  const handleJoinMatch = () => {
+    navigation.navigate(
       'Match',
       {
         online: true,
         token: null,
-        shareId: this.state.match_code,
+        shareId: matchCode,
       }
     );
   }
 
-  componentDidMount(){
-    this.initAds().catch((error) => console.log(error));
-  }
-
-  initAds = async () => {
-   this.setState({'displayBanner': true});
-   console.log('Displaying banner');
-  }
-
-  render () {
-    return (
-      <View style={styles.bigContainer}>
-        <View style={styles.logoContainer} >
-          <Image source={require('./../assets/voley_logo.png')} style={styles.logo} />
-        </View>
-        <View style={styles.container} >
-          <Button
-            style={styles.item}
-            mode="contained"
-            title="Nuevo partido"
-            onPress={() => this.props.navigation.navigate('NewMatch')}
-          >Nuevo partido</Button>
-          <TextInput
-            style={styles.item}
-            label="Codigo de acceso"
-            value={this.state.match_code}
-            onChangeText={text => this.handleMatchCodeChange(text)}
-          />
-          <Button
-            style={styles.item}
-            mode="contained"
-            title="Unirse a partido"
-            onPress={() => {this.handleJoinMatch()}}
-          >Unirse a partido</Button>
-        </View>
-          {
-            this.state.displayBanner && <View style={styles.adContainer}>
-            <AdMobBanner
-              bannerSize="banner"
-              adUnitID="ca-app-pub-1559311694967743/5371344310"
-              servePersonalizedAds
-              onDidFailToReceiveAdWithError={(err) => {
-                console.log('Banner error');
-                console.log(err);
-              }} />
-            </View>
-          }
+  return (
+    <View style={styles.bigContainer}>
+      <View style={styles.logoContainer} >
+        <Image source={require('./../assets/voley_logo.png')} style={styles.logo} />
       </View>
-    )
-  }
+      <View style={styles.container} >
+        <Button
+          style={styles.item}
+          mode="contained"
+          title="Nuevo partido"
+          onPress={() => navigation.navigate('NewMatch')}
+        >Nuevo partido</Button>
+        <TextInput
+          style={styles.item}
+          label="Codigo de acceso"
+          value={matchCode}
+          onChangeText={text => handleMatchCodeChange(text)}
+        />
+        <Button
+          style={styles.item}
+          mode="contained"
+          title="Unirse a partido"
+          onPress={() => {handleJoinMatch()}}
+        >Unirse a partido</Button>
+      </View>
+        {
+          displayBanner && <View style={styles.adContainer}>
+          <AdMobBanner
+            bannerSize="banner"
+            adUnitID="ca-app-pub-1559311694967743/5371344310"
+            servePersonalizedAds
+            onDidFailToReceiveAdWithError={(err) => {
+              console.log('Banner error');
+              console.log(err);
+            }} />
+          </View>
+        }
+    </View>
+  )
 }
 
 

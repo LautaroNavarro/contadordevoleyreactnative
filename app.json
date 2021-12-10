@@ -23,7 +23,7 @@
       "permissions": ["INTERNET"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#121212"
+        "backgroundColor": "#ffffff"
       },
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-1559311694967743~9477615444"
