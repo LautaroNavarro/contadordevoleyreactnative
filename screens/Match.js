@@ -1,20 +1,19 @@
-import React, { Component } from 'react';
-
-import { StyleSheet, Image, View } from 'react-native';
-
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { StyleSheet, Image, View, Clipboard } from 'react-native';
 import { Text, Button, IconButton, Colors, Modal, Portal, ActivityIndicator } from 'react-native-paper';
-
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-
-import MatchSummaryModal from './../components/MatchSummaryModal';
 import socketIOClient from "socket.io-client";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {
   AdMobBanner,
   setTestDeviceIDAsync,
 } from 'expo-ads-admob';
-import { Clipboard } from 'react-native';
+
+import MatchSummaryModal from './../components/MatchSummaryModal';
 import MatchEngine from './../engine/MatchEngine';
+import { setMatch, selectMatch, substractPointTeam, addPointTeam, cleanMatch } from './../reducers/match/matchSlice';
+import { connectToSocket, emitMessage } from './../reducers/socket/socket.actions';
 
 const styles = StyleSheet.create({
   bigContainer: {
@@ -70,65 +69,124 @@ const styles = StyleSheet.create({
   }
 });
 
-class Match extends Component {
+const Match = ({route, navigation}) => {
 
-  state = {
-      'disabled_buttons': false,
-      'loading': false,
-      'id': null,
-      'sets_number': 3,
-      'status': null,
-      'set_points_number': null,
-      'points_difference': null,
-      'tie_break_points': null,
-      'sets': [],
-      'teams': {
-          'team_one': {
-              'name': '',
-              'color': '',
+  const dispatch = useDispatch();
+  const match = useSelector(selectMatch);
+
+  const [displayBanner, setDisplayBanner] = useState(false);
+  const [dismissModal, setDismissModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [displayCopiedMessage, setDisplayCopiedMessage] = useState(false);
+
+  const initAds = async () => {
+    setDisplayBanner(true);
+  };
+
+  useEffect(() => {
+    initAds().catch((error) => console.log(error));
+  }, []);
+
+  useEffect(async () => {
+
+      if (route.params.online) {
+        dispatch(setMatch({
+          disabled_buttons: false,
+          'id': null,
+          'sets_number': route.params.sets,
+          'status': null,
+          'set_points_number': 25,
+          'points_difference': 2,
+          'tie_break_points': 15,
+          'sets': [],
+          'teams': {
+              'team_one': {
+                  'name': route.params.team_one_name,
+                  'color': route.params.team_one_color,
+              },
+              'team_two': {
+                  'name': route.params.team_two_name,
+                  'color': route.params.team_two_color,
+              }
           },
-          'team_two': {
-              'name': '',
-              'color': '',
-          }
-      },
-      'winner': null,
-      'dismissModal': false,
-      'displayBanner': false,
-      'token': null,
-      'shareId': null,
-      'game_status': null,
-      'displayCopiedMessage': false,
-    }
+          'winner': null,
+        }));
+        await dispatch(connectToSocket());
+        dispatch(emitMessage({
+          destination: 'watch',
+          body: {match_id: route.params.shareId},
+        }));
 
-  initAds = async () => {
-   this.setState({'displayBanner': true});
-  }
-
-  substractPointTeam(team) {
-      if (this.props.route.params.online) {
-        this.callEvent(`substract_${team === 1 ? 'team_one' : 'team_two'}`)
+        // this.setState({
+        //   'loading': true,
+        //   'teams': {
+        //       'team_one': {
+        //           'name': route.params.team_one_name,
+        //           'color': route.params.team_one_color,
+        //       },
+        //       'team_two': {
+        //           'name': route.params.team_two_name,
+        //           'color': route.params.team_two_color,
+        //       }
+        //   },
+        // });
+        // let socket = socketIOClient('https://contadordevoleybejs.herokuapp.com/');
+        // this.socket = socket;
+        // this.subscribeMatch(socket);
       } else {
-        this.match.substractPointTeam(team);
-        this.setState(this.match.json());
+        dispatch(setMatch({
+          // 'disabled_buttons': false,
+          'id': null,
+          'sets_number': route.params.sets,
+          'status': null,
+          'set_points_number': 25,
+          'points_difference': 2,
+          'tie_break_points': 15,
+          'sets': [],
+          'teams': {
+              'team_one': {
+                  'name': route.params.team_one_name,
+                  'color': route.params.team_one_color,
+              },
+              'team_two': {
+                  'name': route.params.team_two_name,
+                  'color': route.params.team_two_color,
+              }
+          },
+          'winner': null,
+        }));
+      }
+  }, []);
+
+  const substractPointTeamLocal = (team) => {
+      if (route.params.online) {
+        // this.callEvent(`substract_${team === 1 ? 'team_one' : 'team_two'}`)
+      } else {
+        dispatch(substractPointTeam(team));
       }
   }
 
-  addPointTeam(team) {
-    if (this.props.route.params.online) {
-      this.callEvent(`add_${team === 1 ? 'team_one' : 'team_two'}`)
+  const addPointTeamLocal = (team) => {
+    if (route.params.online) {
+        dispatch(emitMessage({
+          destination: 'update',
+          body: {
+            'id': route.params.shareId,
+            'token': route.params.token,
+            'action': `add_${team === 1 ? 'team_one' : 'team_two'}`,
+          },
+        }));
     } else {
-      this.match.addPointTeam(team);
-      this.setState(this.match.json());
+      dispatch(addPointTeam(team));
     }
   }
 
-  getRenderedSets (team) {
-      let renderedWon = this.state.teams[team].sets;
+  const getRenderedSets = (team) => {
+      let renderedWon = match.teams[team].sets;
       let renderedWonCount = 0;
 
       let render = [];
-      for (let i = 0; i < Math.floor(((this.state.sets_number / 2) + 1)); i++) {
+      for (let i = 0; i < Math.floor(((match.sets_number / 2) + 1)); i++) {
           if (renderedWonCount < renderedWon) {
               render.push(
                   <View style={{...styles.circle, backgroundColor: 'white'}} key={`${team}-${i}`}></View>
@@ -143,214 +201,164 @@ class Match extends Component {
       return render;
   }
 
-  async subscribeMatch (socket) {
-      socket.emit('watch', {'match_id': this.props.route.params.shareId});
-      socket.on(
-          'match_update',
-          (data) => {
-              ((that) => {
-                  console.log('Data recibida: ' + data.id);
-                  that.setState({loading: false, disabled_buttons: false});
-                  that.setState(data);
-              })(this);
-          }
-      );
+  // const subscribeMatch = async (socket) => {
+  //     socket.emit('watch', {'match_id': route.params.shareId});
+  //     socket.on(
+  //         'match_update',
+  //         (data) => {
+  //             ((that) => {
+  //                 console.log('Data recibida: ' + data.id);
+  //                 that.setState({loading: false, disabled_buttons: false});
+  //                 that.setState(data);
+  //             })(this);
+  //         }
+  //     );
+  // }
+
+  // const callEvent = async (action) => {
+  //     if (this.state.game_status !== 'FINISHED' && !this.state.disabled_buttons) {
+  //         this.setState({disabled_buttons: true});
+  //         this.socket.emit('update', {
+  //             'id': route.params.shareId,
+  //             'token': route.params.token,
+  //             'action': action,
+  //         });
+  //     }
+  // }
+
+  const getCurrentSet = () => {
+    return match.sets[match.sets.length - 1];
   }
 
-  async callEvent(action) {
-      if (this.state.game_status !== 'FINISHED' && !this.state.disabled_buttons) {
-          this.setState({disabled_buttons: true});
-          this.socket.emit('update', {
-              'id': this.props.route.params.shareId,
-              'token': this.props.route.params.token,
-              'action': action,
-          });
-      }
+  const dismissModalFunc = () => {
+      dispatch(cleanMatch());
+      setDismissModal(true);
+      navigation.navigate('Home');
   }
 
-  componentDidMount () {
-
-      if (this.props.route.params.online) {
-        this.setState({
-          'loading': true,
-          'teams': {
-              'team_one': {
-                  'name': this.props.route.params.team_one_name,
-                  'color': this.props.route.params.team_one_color,
-              },
-              'team_two': {
-                  'name': this.props.route.params.team_two_name,
-                  'color': this.props.route.params.team_two_color,
-              }
-          },
-        });
-        let socket = socketIOClient('https://contadordevoleybejs.herokuapp.com/');
-        this.socket = socket;
-        this.subscribeMatch(socket);
-      } else {
-        let jsonMatch = {
-          'disabled_buttons': false,
-          'loading': false,
-          'id': null,
-          'sets_number': this.props.route.params.sets,
-          'status': null,
-          'set_points_number': 25,
-          'points_difference': 2,
-          'tie_break_points': 15,
-          'sets': [],
-          'teams': {
-              'team_one': {
-                  'name': this.props.route.params.team_one_name,
-                  'color': this.props.route.params.team_one_color,
-              },
-              'team_two': {
-                  'name': this.props.route.params.team_two_name,
-                  'color': this.props.route.params.team_two_color,
-              }
-          },
-          'winner': null,
-          'dismissModal': false,
-        }
-        this.match = new MatchEngine(jsonMatch);
-        this.setState(this.match.json())
-      }
-
-      this.initAds().catch((error) => console.log(error));
-  }
-
-  getCurrentSet() {
-      return this.state.sets[this.state.sets.length - 1];
-  }
-
-  dismissModal() {
-      this.setState({dismissModal: true})
-      this.props.navigation.navigate('Home');
-  }
-
-  copyToIdClipBoard(){
-    Clipboard.setString(this.props.route.params.shareId);
-    this.setState({displayCopiedMessage: true});
+  const copyToIdClipBoard = () => {
+    Clipboard.setString(route.params.shareId);
+    setDisplayCopiedMessage(true);
     setTimeout(
-      () => {this.setState({displayCopiedMessage: false})},
+      () => {setDisplayCopiedMessage(false)},
       1000
     );
   }
 
-  render () {
-    if (this.state.loading) {
-      return (
-        <Modal visible={true} dismissable={false}>
-          <ActivityIndicator animating={true} />
-        </Modal>
-      );
-    }
+  if (loading || !match) {
     return (
-      <View style={styles.bigContainer}>
-        <Portal>
-        {this.state.winner != null ? <MatchSummaryModal visible={!this.state.dismissModal} match={this.state} onDismiss={() => {this.dismissModal()}} /> : null}
-        </Portal>
-        {
-          this.props.route.params.online && 
-          <View style={styles.shareContainer}>
-            <View style={styles.shareSubContainer}>
-            <Icon.Button
-              name="copy"
-              backgroundColor='#d8358d'
-              onPress={() => {this.copyToIdClipBoard()}}
-            >
-              {this.props.route.params.shareId}
-            </Icon.Button>
-            {
-              this.state.displayCopiedMessage && <View style={{ backgroundColor: 'white', padding: 4, borderRadius: 15, margin: 1, position: 'absolute', left: 100}}>
-              <Text style={{color: '#d8358d'}}>Copiado!</Text>
-            </View>
-            }
+      <Modal visible={true} dismissable={false}>
+        <ActivityIndicator animating={true} />
+      </Modal>
+    );
+  }
 
-            </View>
+  return (
+    <View style={styles.bigContainer}>
+      <Portal>
+      {match.winner !== null ? <MatchSummaryModal visible={!dismissModal} match={match} onDismiss={() => {dismissModalFunc()}} /> : null}
+      </Portal>
+      {
+        route.params.online && 
+        <View style={styles.shareContainer}>
+          <View style={styles.shareSubContainer}>
+          <Icon.Button
+            name="copy"
+            backgroundColor='#d8358d'
+            onPress={() => {copyToIdClipBoard()}}
+          >
+            {route.params.shareId}
+          </Icon.Button>
+          {
+            match.displayCopiedMessage && <View style={{ backgroundColor: 'white', padding: 4, borderRadius: 15, margin: 1, position: 'absolute', left: 100}}>
+            <Text style={{color: '#d8358d'}}>Copiado!</Text>
+          </View>
+          }
+
+          </View>
+        </View>
+      }
+      
+      <View style={styles.container}>
+        <View style={styles.item}>
+          <Text style={styles.teamNames} >{match.teams.team_one.name}</Text>
+          <View style={styles.container} >
+            {getRenderedSets('team_one')}
+          </View>
+          <View style={{...styles.teamCountersContainer, backgroundColor: match.teams.team_one.color, borderColor: match.teams.team_one.color}}>
+            <Text style={{fontSize: wp('20%'), color: 'white'}} >{getCurrentSet() !== undefined ? getCurrentSet().team_one : 0}</Text>
+          </View>
+
+          {
+            ((route.params.online && route.params.token) || !route.params.online) &&
+              <View style={{...styles.container, marginLeft: 'auto', marginRight: 'auto'}}>
+                <View>
+                  <IconButton
+                    disabled={route.params.online ? match.disabled_buttons : false}
+                    icon="minus"
+                    color= {Colors.red500}
+                    size={wp('10%')}
+                    onPress={() => substractPointTeamLocal(1)}
+                  />
+                </View>
+                <View>
+                  <IconButton
+                    disabled={route.params.online ? match.disabled_buttons : false}
+                      icon="plus"
+                      color= {Colors.red500}
+                      size={wp('10%')}
+                      onPress={() => addPointTeamLocal(1)}
+                    />
+                  </View>
+                </View>
+          }
+        </View>
+        <View style={styles.item}>
+          <Text style={styles.teamNames}>{match.teams.team_two.name}</Text>
+          <View style={styles.container} >
+            {getRenderedSets('team_two')}
+          </View>
+          <View style={{...styles.teamCountersContainer, backgroundColor: match.teams.team_two.color, borderColor: match.teams.team_two.color}}>
+            <Text style={{fontSize: wp('20%'), color: 'white'}} >{getCurrentSet() !== undefined ? getCurrentSet().team_two : 0}</Text>
+          </View>
+          {
+            ((route.params.online && route.params.token) || !route.params.online) && 
+              <View style={{...styles.container, marginLeft: 'auto', marginRight: 'auto'}}>
+                <View>
+                  <IconButton
+                    disabled={route.params.online ? match.disabled_buttons : false}
+                    icon="minus"
+                    color= {Colors.red500}
+                    size={wp('10%')}
+                    onPress={() => substractPointTeamLocal(2)}
+                  />
+                </View>
+                <View>
+                  <IconButton
+                      disabled={route.params.online ? match.disabled_buttons : false}
+                      icon="plus"
+                      color= {Colors.red500}
+                      size={wp('10%')}
+                      onPress={() => addPointTeamLocal(2)}
+                    />
+                  </View>
+                </View>
+          }
+          </View>
+      </View>
+        {
+          match.displayBanner && <View style={styles.adContainer}>
+          <AdMobBanner
+            bannerSize="banner"
+            adUnitID="ca-app-pub-1559311694967743/5371344310"
+            servePersonalizedAds
+            onDidFailToReceiveAdWithError={(err) => {
+              console.log(err);
+            }} />
           </View>
         }
-        
-        <View style={styles.container}>
-          <View style={styles.item}>
-            <Text style={styles.teamNames} >{this.state.teams.team_one.name}</Text>
-            <View style={styles.container} >
-              {this.getRenderedSets('team_one')}
-            </View>
-            <View style={{...styles.teamCountersContainer, backgroundColor: this.state.teams.team_one.color, borderColor: this.state.teams.team_one.color}}>
-              <Text style={{fontSize: wp('20%'), color: 'white'}} >{this.getCurrentSet() !== undefined ? this.getCurrentSet().team_one : 0}</Text>
-            </View>
-
-            {
-              ((this.props.route.params.online && this.props.route.params.token) || !this.props.route.params.online) &&
-                <View style={{...styles.container, marginLeft: 'auto', marginRight: 'auto'}}>
-                  <View>
-                    <IconButton
-                      disabled={this.props.route.params.online ? this.state.disabled_buttons : false}
-                      icon="minus"
-                      color= {Colors.red500}
-                      size={wp('10%')}
-                      onPress={() => this.substractPointTeam(1)}
-                    />
-                  </View>
-                  <View>
-                    <IconButton
-                      disabled={this.props.route.params.online ? this.state.disabled_buttons : false}
-                        icon="plus"
-                        color= {Colors.red500}
-                        size={wp('10%')}
-                        onPress={() => this.addPointTeam(1)}
-                      />
-                    </View>
-                  </View>
-            }
-          </View>
-          <View style={styles.item}>
-            <Text style={styles.teamNames}>{this.state.teams.team_two.name}</Text>
-            <View style={styles.container} >
-              {this.getRenderedSets('team_two')}
-            </View>
-            <View style={{...styles.teamCountersContainer, backgroundColor: this.state.teams.team_two.color, borderColor: this.state.teams.team_two.color}}>
-              <Text style={{fontSize: wp('20%'), color: 'white'}} >{this.getCurrentSet() !== undefined ? this.getCurrentSet().team_two : 0}</Text>
-            </View>
-            {
-              ((this.props.route.params.online && this.props.route.params.token) || !this.props.route.params.online) && 
-                <View style={{...styles.container, marginLeft: 'auto', marginRight: 'auto'}}>
-                  <View>
-                    <IconButton
-                      disabled={this.props.route.params.online ? this.state.disabled_buttons : false}
-                      icon="minus"
-                      color= {Colors.red500}
-                      size={wp('10%')}
-                      onPress={() => this.substractPointTeam(2)}
-                    />
-                  </View>
-                  <View>
-                    <IconButton
-                        disabled={this.props.route.params.online ? this.state.disabled_buttons : false}
-                        icon="plus"
-                        color= {Colors.red500}
-                        size={wp('10%')}
-                        onPress={() => this.addPointTeam(2)}
-                      />
-                    </View>
-                  </View>
-            }
-            </View>
-        </View>
-          {
-            this.state.displayBanner && <View style={styles.adContainer}>
-            <AdMobBanner
-              bannerSize="banner"
-              adUnitID="ca-app-pub-1559311694967743/5371344310"
-              servePersonalizedAds
-              onDidFailToReceiveAdWithError={(err) => {
-                console.log(err);
-              }} />
-            </View>
-          }
-      </View>
-    )
-  }
+    </View>
+  )
 }
 
 

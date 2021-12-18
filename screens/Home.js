@@ -45,7 +45,6 @@ const Home = ({navigation}) => {
 
   const initAds = async () => {
     setDisplayBanner(true);
-    console.log('Displaying banner');
   }
 
   useEffect(() => {

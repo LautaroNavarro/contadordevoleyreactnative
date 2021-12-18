@@ -1,16 +1,23 @@
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
 import { combineReducers } from 'redux';
+
 import test from './test/testSlice';
+import match from './match/matchSlice';
+import socket from './socket/socket.slice';
+import socketMiddleware from './socket/socket.middleware';
 
 const middleware = [
   ...getDefaultMiddleware({
     serializableCheck: false,
   }),
+  socketMiddleware(),
   	// We need to add the websocket middleware here
 ];
 
 const rootReducer = combineReducers({
-	test,
+	socket,
+  test,
+  match,
 });
 
 export const createStore = initialState =>
