@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { StyleSheet, Image, View } from 'react-native';
 import { Text, Button, TextInput } from 'react-native-paper';
 
+import { playWhistleSound } from './../common/sounds';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
 import {

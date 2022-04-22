@@ -13,7 +13,10 @@ import {
 import MatchSummaryModal from './../components/MatchSummaryModal';
 import MatchEngine from './../engine/MatchEngine';
 import { setMatch, selectMatch, substractPointTeam, addPointTeam, cleanMatch } from './../reducers/match/matchSlice';
+import { selectSound } from './../reducers/settings/settingsSlice';
+import { playPointOneSound, playPointTwoSound } from './../common/sounds';
 import { connectToSocket, emitMessage } from './../reducers/socket/socket.actions';
+import { SoundEngineInstance } from './../App';
 
 const styles = StyleSheet.create({
   bigContainer: {
@@ -73,6 +76,7 @@ const Match = ({route, navigation}) => {
 
   const dispatch = useDispatch();
   const match = useSelector(selectMatch);
+  const soundSettings = useSelector(selectSound);
 
   const [displayBanner, setDisplayBanner] = useState(false);
   const [dismissModal, setDismissModal] = useState(false);
@@ -167,6 +171,12 @@ const Match = ({route, navigation}) => {
   }
 
   const addPointTeamLocal = (team) => {
+    if (team === 1) {
+      // SoundEngineInstance.playPointOneSound(soundSettings);
+    } else {
+      // playPointTwoSound(soundSettings);
+    }
+    
     if (route.params.online) {
         dispatch(emitMessage({
           destination: 'update',
