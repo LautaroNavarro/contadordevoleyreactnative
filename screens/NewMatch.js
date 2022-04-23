@@ -1,24 +1,20 @@
 import React, { useEffect, useState } from 'react';
-
 import { StyleSheet, Image, View } from 'react-native';
-
-import { Text, Button, TextInput, RadioButton, Divider, Switch, ActivityIndicator, Modal, Portal } from 'react-native-paper';
-
+import { Text, Button, TextInput, RadioButton, Divider, ActivityIndicator, Modal, Portal } from 'react-native-paper';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-
 import { ColorPicker, fromHsv } from 'react-native-color-picker'
-
 import axios from 'axios';
-
 import {
   AdMobBanner,
   setTestDeviceIDAsync,
 } from 'expo-ads-admob';
 
+import AdBanner from './../components/Ads/AdBanner';
+import Container from './../components/Container/Container';
+import Switch from './../components/Inputs/Switch';
+import WidthContainer from './../components/Container/WidthContainer';
+
 const styles = StyleSheet.create({
-  bigContainer: {
-    height: hp('100%'),
-  },
   container: {
     flex: 0,
     flexDirection: 'row',
@@ -29,13 +25,6 @@ const styles = StyleSheet.create({
     marginLeft: hp('1%'),
     marginRight: hp('1%'),
   },
-  adContainer: {
-    alignItems: 'center',
-    width: wp('100%'),
-    height: 50,
-    bottom: 75,
-    position: 'absolute',
-  }
 });
 
 const NewMatch = ({navigation}) => {
@@ -61,7 +50,6 @@ const NewMatch = ({navigation}) => {
   const [tieBreakPoints, setTieBreakPoints] = useState(15);
   const [sets, setSets] = useState('3');
   const [onlineMatch, setOnlineMatch] = useState(false);
-  const [displayBanner, setDisplayBanner] = useState(false);
   const [loading, setLoading] = useState(false);
 
   state = {
@@ -82,17 +70,8 @@ const NewMatch = ({navigation}) => {
     tie_break_points: 15,
     sets: '3',
     online_match: false,
-    displayBanner: false,
     loading: false,
   };
-
-  const initAds = async () => {
-   setDisplayBanner(true);
-  }
-
-  useEffect (() => {
-    initAds().catch((error) => console.log(error));
-  }, []);
 
   const handleChangeOnlineMatch = (value) => {
     setOnlineMatch(value)
@@ -182,7 +161,7 @@ const NewMatch = ({navigation}) => {
   }
 
   return (
-    <View style={styles.bigContainer}>
+    <Container>
       {
         loading && <>
           <Portal>
@@ -239,12 +218,9 @@ const NewMatch = ({navigation}) => {
         </RadioButton.Group>
       </View>
       <Divider style={{marginLeft: wp('4%'), marginRight: wp('4%'), }} />
-      <View style={{padding: wp('5'), flexDirection: 'row', flex:0, marginRight: wp('4%')}}>
-        <View style={{width: wp('80%'), padding: 5}}>
-          <Text style={{ fontSize: 18}}>Partido online</Text>
-        </View>
-        <Switch style={{width: wp('10%')}} value={onlineMatch} onValueChange={value => handleChangeOnlineMatch(value)} />
-      </View>
+      <WidthContainer>
+        <Switch label={'Partido online'} value={onlineMatch} onValueChange={value => handleChangeOnlineMatch(value)} />
+      </WidthContainer>
       <View style={{marginLeft: wp('4%'), marginRight: wp('4%'), }}>
         <Button
           mode="contained"
@@ -252,18 +228,8 @@ const NewMatch = ({navigation}) => {
           onPress={() => handleCreateMatch()}
         >Crear partido</Button>
       </View>
-        {
-          displayBanner && <View style={styles.adContainer}>
-          <AdMobBanner
-            bannerSize="banner"
-            adUnitID="ca-app-pub-1559311694967743/5371344310"
-            servePersonalizedAds
-            onDidFailToReceiveAdWithError={(err) => {
-              console.log(err);
-            }} />
-          </View>
-        }
-    </View>
+      <AdBanner />
+    </Container>
   );
 }
 

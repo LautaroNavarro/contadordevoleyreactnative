@@ -1,8 +1,8 @@
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
 import { combineReducers } from 'redux';
 
-import test from './test/testSlice';
 import match from './match/matchSlice';
+import theme from './theme/themeSlice';
 import socket from './socket/socket.slice';
 import socketMiddleware from './socket/socket.middleware';
 
@@ -16,8 +16,8 @@ const middleware = [
 
 const rootReducer = combineReducers({
 	socket,
-  test,
   match,
+  theme,
 });
 
 export const createStore = initialState =>

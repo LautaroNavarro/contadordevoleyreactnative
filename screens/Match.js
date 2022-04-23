@@ -14,11 +14,10 @@ import MatchSummaryModal from './../components/MatchSummaryModal';
 import MatchEngine from './../engine/MatchEngine';
 import { setMatch, selectMatch, substractPointTeam, addPointTeam, cleanMatch } from './../reducers/match/matchSlice';
 import { connectToSocket, emitMessage } from './../reducers/socket/socket.actions';
+import AdBanner from './../components/Ads/AdBanner';
+import Container from './../components/Container/Container';
 
 const styles = StyleSheet.create({
-  bigContainer: {
-    height: hp('100%'),
-  },
   container: {
     flex: 0,
     flexDirection: 'row',
@@ -60,13 +59,6 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     marginBottom: hp('1%')
   },
-  adContainer: {
-    alignItems: 'center',
-    width: wp('100%'),
-    height: 50,
-    bottom: 75,
-    position: 'absolute',
-  }
 });
 
 const Match = ({route, navigation}) => {
@@ -74,18 +66,9 @@ const Match = ({route, navigation}) => {
   const dispatch = useDispatch();
   const match = useSelector(selectMatch);
 
-  const [displayBanner, setDisplayBanner] = useState(false);
   const [dismissModal, setDismissModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [displayCopiedMessage, setDisplayCopiedMessage] = useState(false);
-
-  const initAds = async () => {
-    setDisplayBanner(true);
-  };
-
-  useEffect(() => {
-    initAds().catch((error) => console.log(error));
-  }, []);
 
   useEffect(async () => {
 
@@ -254,7 +237,7 @@ const Match = ({route, navigation}) => {
   }
 
   return (
-    <View style={styles.bigContainer}>
+    <Container>
       <Portal>
       {match.winner !== null ? <MatchSummaryModal visible={!dismissModal} match={match} onDismiss={() => {dismissModalFunc()}} /> : null}
       </Portal>
@@ -346,18 +329,8 @@ const Match = ({route, navigation}) => {
           }
           </View>
       </View>
-        {
-          match.displayBanner && <View style={styles.adContainer}>
-          <AdMobBanner
-            bannerSize="banner"
-            adUnitID="ca-app-pub-1559311694967743/5371344310"
-            servePersonalizedAds
-            onDidFailToReceiveAdWithError={(err) => {
-              console.log(err);
-            }} />
-          </View>
-        }
-    </View>
+      <AdBanner />
+    </Container>
   )
 }
 

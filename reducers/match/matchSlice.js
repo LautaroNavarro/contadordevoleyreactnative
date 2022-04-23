@@ -79,14 +79,13 @@ export const matchSlice = createSlice({
         let index = state.instance.sets.length - 1;
         let team_points = team === 1 ? 'team_one' : 'team_two';
         if (state.instance.sets[index][team_points] === 0){
-            if (state.instance.sets.length === 1){
-                return false;
+            if (state.instance.sets.length !== 1){
+              state.instance.sets.pop();
+              let index = state.instance.sets.length - 1;
+              state.instance.teams[state.instance.sets[index].winner].sets = state.instance.teams[state.instance.sets[index].winner].sets - 1;
+              state.instance.sets[index][state.instance.sets[index].winner] = state.instance.sets[index][state.instance.sets[index].winner] - 1;
+              state.instance.sets[index].winner = null;
             }
-            state.instance.sets.pop();
-            let index = state.instance.sets.length - 1;
-            state.instance.teams[state.instance.sets[index].winner].sets = state.instance.teams[state.instance.sets[index].winner].sets - 1;
-            state.instance.sets[index][state.instance.sets[index].winner] = state.instance.sets[index][state.instance.sets[index].winner] - 1;
-            state.instance.sets[index].winner = null;
         } else {
             state.instance.sets[index][team_points] = state.instance.sets[index][team_points] - 1;
         }
