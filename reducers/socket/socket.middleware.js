@@ -23,9 +23,6 @@ const onError = store => () => {
 };
 
 const onMessage = (store, onMessageAction) => (type, message) => {
-  console.log('MESSAGE RECEIVE')
-  console.log(type);
-  console.log(message);
   store.dispatch(onMessageAction({
     type: type,
     message: message,

@@ -9,11 +9,13 @@ import {
   AdMobBanner,
   setTestDeviceIDAsync,
 } from 'expo-ads-admob';
+import { Audio } from 'expo-av';
 
 import MatchSummaryModal from './../components/MatchSummaryModal';
 import MatchEngine from './../engine/MatchEngine';
-import { setMatch, selectMatch, substractPointTeam, addPointTeam, cleanMatch } from './../reducers/match/matchSlice';
-import { connectToSocket, emitMessage } from './../reducers/socket/socket.actions';
+import { setMatch, selectMatch, substractPointTeam, addPointTeam, cleanMatch, setDisabledButtons, selectDisabledButtons, selectSoundToPlay, cleanSoundToPlay } from './../reducers/match/matchSlice';
+import { selectSoundEnabled } from './../reducers/sound/soundSlice';
+import { connectToSocket, emitMessage, disconnectSocket } from './../reducers/socket/socket.actions';
 import AdBanner from './../components/Ads/AdBanner';
 import Container from './../components/Container/Container';
 
@@ -69,97 +71,151 @@ const Match = ({route, navigation}) => {
   const [dismissModal, setDismissModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [displayCopiedMessage, setDisplayCopiedMessage] = useState(false);
+  const [soundA, setSoundA] = useState(null);
+  const [soundB, setSoundB] = useState(null);
+  const soundEnabled = useSelector(selectSoundEnabled);
+  const disabledButtons = useSelector(selectDisabledButtons);
+  const soundToPlay = useSelector(selectSoundToPlay);
 
-  useEffect(async () => {
 
+  const playSoundA = async () => {
+    if (soundEnabled) {
+      const { sound } = await Audio.Sound.createAsync(
+        require('./../assets/sounds/point_a.mp3')
+      );
+      setSoundA(sound);
+      await sound.playAsync();
+    }
+  }
+
+  const playSoundB = async () => {
+    if (soundEnabled) {
+      const { sound } = await Audio.Sound.createAsync(
+        require('./../assets/sounds/point_b.mp3')
+      );
+      setSoundB(sound);
+      await sound.playAsync();
+    }
+  }
+
+  useEffect(() => {
+    if (soundToPlay) {
+      if (soundToPlay === 'add') {
+        playSoundB();
+      } else {
+        playSoundA();
+      }
+      dispatch(cleanSoundToPlay());
+    }
+  }, [soundToPlay]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(cleanMatch());
+      if (route.params.online) {
+        dispatch(disconnectSocket());        
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    return soundA
+      ? () => {
+        soundA.unloadAsync(); }
+      : undefined;
+  }, [soundA]);
+
+  useEffect(() => {
+    return soundB
+      ? () => {
+        soundB.unloadAsync(); }
+      : undefined;
+  }, [soundB]);
+
+  useEffect(() => {
+    (async () => {
       if (route.params.online) {
         dispatch(setMatch({
-          disabled_buttons: false,
-          'id': null,
-          'sets_number': route.params.sets,
-          'status': null,
-          'set_points_number': 25,
-          'points_difference': 2,
-          'tie_break_points': 15,
-          'sets': [],
-          'teams': {
-              'team_one': {
-                  'name': route.params.team_one_name,
-                  'color': route.params.team_one_color,
+          disabled_buttons: true,
+          id: null,
+          sets_number: route.params.sets,
+          status: null,
+          set_points_number: 25, // TODO: Change this
+          points_difference: 2, // TODO: Change this
+          tie_break_points: 15, // TODO: Change this
+          sets: [],
+          teams: {
+              team_one: {
+                  name: route.params.team_one_name,
+                  color: route.params.team_one_color,
               },
-              'team_two': {
-                  'name': route.params.team_two_name,
-                  'color': route.params.team_two_color,
+              team_two: {
+                  name: route.params.team_two_name,
+                  color: route.params.team_two_color,
               }
           },
-          'winner': null,
+          winner: null,
         }));
         await dispatch(connectToSocket());
         dispatch(emitMessage({
           destination: 'watch',
           body: {match_id: route.params.shareId},
         }));
-
-        // this.setState({
-        //   'loading': true,
-        //   'teams': {
-        //       'team_one': {
-        //           'name': route.params.team_one_name,
-        //           'color': route.params.team_one_color,
-        //       },
-        //       'team_two': {
-        //           'name': route.params.team_two_name,
-        //           'color': route.params.team_two_color,
-        //       }
-        //   },
-        // });
-        // let socket = socketIOClient('https://contadordevoleybejs.herokuapp.com/');
-        // this.socket = socket;
-        // this.subscribeMatch(socket);
       } else {
         dispatch(setMatch({
-          // 'disabled_buttons': false,
-          'id': null,
-          'sets_number': route.params.sets,
-          'status': null,
-          'set_points_number': 25,
-          'points_difference': 2,
-          'tie_break_points': 15,
-          'sets': [],
-          'teams': {
-              'team_one': {
-                  'name': route.params.team_one_name,
-                  'color': route.params.team_one_color,
+          id: null,
+          sets_number: route.params.sets,
+          status: null,
+          set_points_number: 25,
+          points_difference: 2,
+          tie_break_points: 15,
+          sets: [],
+          teams: {
+              team_one: {
+                  name: route.params.team_one_name,
+                  color: route.params.team_one_color,
               },
-              'team_two': {
-                  'name': route.params.team_two_name,
-                  'color': route.params.team_two_color,
+              team_two: {
+                  name: route.params.team_two_name,
+                  color: route.params.team_two_color,
               }
           },
-          'winner': null,
+          winner: null,
         }));
       }
+    })();
   }, []);
 
-  const substractPointTeamLocal = (team) => {
+  const substractPointTeamLocal = async (team) => {
       if (route.params.online) {
-        // this.callEvent(`substract_${team === 1 ? 'team_one' : 'team_two'}`)
-      } else {
-        dispatch(substractPointTeam(team));
-      }
-  }
-
-  const addPointTeamLocal = (team) => {
-    if (route.params.online) {
+        dispatch(setDisabledButtons(true));
         dispatch(emitMessage({
           destination: 'update',
           body: {
             'id': route.params.shareId,
             'token': route.params.token,
-            'action': `add_${team === 1 ? 'team_one' : 'team_two'}`,
+            'action': `substract_${team === 1 ? 'team_one' : 'team_two'}`,
           },
         }));
+      } else {
+        await playSoundA();
+        dispatch(substractPointTeam(team));
+      }
+  }
+
+  const addPointTeamLocal = async (team) => {
+    if (route.params.online) {
+      dispatch(setDisabledButtons(true));
+      dispatch(emitMessage({
+        destination: 'update',
+        body: {
+          'id': route.params.shareId,
+          'token': route.params.token,
+          'action': `add_${team === 1 ? 'team_one' : 'team_two'}`,
+        },
+      }));
     } else {
+      await playSoundB();
       dispatch(addPointTeam(team));
     }
   }
@@ -183,31 +239,6 @@ const Match = ({route, navigation}) => {
       }
       return render;
   }
-
-  // const subscribeMatch = async (socket) => {
-  //     socket.emit('watch', {'match_id': route.params.shareId});
-  //     socket.on(
-  //         'match_update',
-  //         (data) => {
-  //             ((that) => {
-  //                 console.log('Data recibida: ' + data.id);
-  //                 that.setState({loading: false, disabled_buttons: false});
-  //                 that.setState(data);
-  //             })(this);
-  //         }
-  //     );
-  // }
-
-  // const callEvent = async (action) => {
-  //     if (this.state.game_status !== 'FINISHED' && !this.state.disabled_buttons) {
-  //         this.setState({disabled_buttons: true});
-  //         this.socket.emit('update', {
-  //             'id': route.params.shareId,
-  //             'token': route.params.token,
-  //             'action': action,
-  //         });
-  //     }
-  // }
 
   const getCurrentSet = () => {
     return match.sets[match.sets.length - 1];
@@ -277,7 +308,7 @@ const Match = ({route, navigation}) => {
               <View style={{...styles.container, marginLeft: 'auto', marginRight: 'auto'}}>
                 <View>
                   <IconButton
-                    disabled={route.params.online ? match.disabled_buttons : false}
+                    disabled={route.params.online ? disabledButtons : false}
                     icon="minus"
                     color= {Colors.red500}
                     size={wp('10%')}
@@ -286,7 +317,7 @@ const Match = ({route, navigation}) => {
                 </View>
                 <View>
                   <IconButton
-                    disabled={route.params.online ? match.disabled_buttons : false}
+                    disabled={route.params.online ? disabledButtons : false}
                       icon="plus"
                       color= {Colors.red500}
                       size={wp('10%')}
@@ -309,7 +340,7 @@ const Match = ({route, navigation}) => {
               <View style={{...styles.container, marginLeft: 'auto', marginRight: 'auto'}}>
                 <View>
                   <IconButton
-                    disabled={route.params.online ? match.disabled_buttons : false}
+                    disabled={route.params.online ? disabledButtons : false}
                     icon="minus"
                     color= {Colors.red500}
                     size={wp('10%')}
@@ -318,7 +349,7 @@ const Match = ({route, navigation}) => {
                 </View>
                 <View>
                   <IconButton
-                      disabled={route.params.online ? match.disabled_buttons : false}
+                      disabled={route.params.online ? disabledButtons : false}
                       icon="plus"
                       color= {Colors.red500}
                       size={wp('10%')}

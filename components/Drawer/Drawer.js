@@ -5,6 +5,7 @@ import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {changeTheme, selectIsDarkTheme} from './../../reducers/theme/themeSlice';
+import {changeEnabled, selectSoundEnabled} from './../../reducers/sound/soundSlice';
 import WidthContainer from './../../components/Container/WidthContainer';
 import Switch from './../../components/Inputs/Switch';
 
@@ -32,6 +33,7 @@ const DrawerOptionText = styled.Text`
 const Drawer = ({navigation}) => {
 
 	const isDarkTheme = useSelector(selectIsDarkTheme);
+	const soundEnabled = useSelector(selectSoundEnabled);
 
 	const dispatch = useDispatch();
 
@@ -50,6 +52,7 @@ const Drawer = ({navigation}) => {
 					</DrawerOptionText>
 				</DrawerOptionContainer>
 				<Switch value={isDarkTheme} onValueChange={() => {dispatch(changeTheme())}} label={'Dark mode'}/>
+				<Switch value={soundEnabled} onValueChange={() => {dispatch(changeEnabled())}} label={'Sound'}/>
 			</WidthContainer>
 		</Container>
 	);
