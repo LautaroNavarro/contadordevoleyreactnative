@@ -1,7 +1,6 @@
 
 export const handleSocketMessage = socketMessage => {
   return (dispatch, getState) => {
-    console.log(socketMessage);
     dispatch({ type: socketMessage.type, payload: socketMessage.message });
   };
 };

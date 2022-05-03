@@ -44,7 +44,7 @@ const AppComponent = ({children}) => {
             <Drawer.Navigator drawerContent={(props) => <DrawerComponent {...props}/>}>
               <Drawer.Screen name="Home" component={Home} options={{...screenStyle, title: 'Contador de voley'}}/>
               <Drawer.Screen name="NewMatch" component={NewMatch} options={{...screenStyle, title: 'Nuevo partido'}}/>
-              <Drawer.Screen name="Match" component={Match} options={{...screenStyle, title: 'Partido'}}/>
+              <Drawer.Screen name="Match" component={Match} options={{...screenStyle, title: 'Partido', unmountOnBlur: true}}/>
             </Drawer.Navigator>
           </NavigationContainer>
         </ThemeProvider>

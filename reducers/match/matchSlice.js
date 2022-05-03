@@ -3,6 +3,8 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   loading: false,
   instance: null,
+  disabledButtons: false,
+  soundToPlay: null,
 };
 
 const PLAYING_STATUS = 'PLAYING';
@@ -26,8 +28,14 @@ export const matchSlice = createSlice({
   name: 'match',
   initialState,
   reducers: {
+    cleanSoundToPlay: (state) => {
+      state.soundToPlay = null;
+    },
     cleanMatch: (state) => {
       state.instance = null;
+    },
+    setDisabledButtons: (state, action) => {
+      state.instance.disabledButtons = action.payload;
     },
     setMatch: (state, action) => {
       action.payload.sets = [generateSet()];
@@ -94,14 +102,35 @@ export const matchSlice = createSlice({
   },
   extraReducers: {
     match_update: (state, action) => {
-      console.log(action);
+      let soundToPlay = null;
+      if (state.instance?.sets.length > action.payload.sets.length) {
+        soundToPlay = 'add';
+      }
+      if (state.instance?.sets.length < action.payload.sets.length) {
+        soundToPlay = 'substract';
+      }
+      if (state.instance?.sets.length === action.payload.sets.length) {
+        const oldTeamOnePoints = state.instance?.sets[state.instance?.sets.length - 1].team_one;
+        const oldTeamTwoPoints = state.instance?.sets[state.instance?.sets.length - 1].team_two;
+        const newTeamOnePoints = action.payload?.sets[action.payload?.sets.length - 1].team_one;
+        const newTeamTwoPoints = action.payload?.sets[action.payload?.sets.length - 1].team_two;
+        if (oldTeamOnePoints > newTeamOnePoints || oldTeamTwoPoints > newTeamTwoPoints) {
+          soundToPlay = 'add';
+        } else {
+          soundToPlay = 'substract';
+        }
+      }
       state.instance = action.payload;
+      state.disabledButtons = false;
+      state.soundToPlay = soundToPlay;
     }
   }
 });
 
 export default matchSlice.reducer;
 
-export const { cleanMatch, setMatch, addPointTeam, substractPointTeam } = matchSlice.actions;
+export const { cleanMatch, setMatch, addPointTeam, substractPointTeam, setDisabledButtons, cleanSoundToPlay } = matchSlice.actions;
 
 export const selectMatch = state => state.match.instance;
+export const selectDisabledButtons = state => state.match.disabledButtons;
+export const selectSoundToPlay = state => state.match.soundToPlay;

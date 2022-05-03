@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { StyleSheet, Image, View } from 'react-native';
+import { StyleSheet, Image, View, KeyboardAvoidingView } from 'react-native';
 import { Text, Button, TextInput } from 'react-native-paper';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
@@ -60,6 +60,11 @@ const Home = ({navigation}) => {
 
   return (
     <Container>
+      <KeyboardAvoidingView
+        behavior={'position'}
+        enabled={true}
+        keyboardVerticalOffset={50}
+      >
       <View style={styles.logoContainer} >
         <Image source={require('./../assets/voley_logo.png')} style={styles.logo} />
       </View>
@@ -74,7 +79,7 @@ const Home = ({navigation}) => {
           style={styles.item}
           label="Codigo de acceso"
           value={matchCode}
-          onChangeText={text => handleMatchCodeChange(text)}
+          onChangeText={handleMatchCodeChange}
         />
         <Button
           style={styles.item}
@@ -84,6 +89,7 @@ const Home = ({navigation}) => {
         >Unirse a partido</Button>
       </View>
       <AdBanner />
+      </KeyboardAvoidingView>
     </Container>
   )
 }
