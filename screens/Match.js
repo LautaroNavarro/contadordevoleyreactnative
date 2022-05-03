@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, Image, View, Clipboard } from 'react-native';
-import { Text, Button, IconButton, Colors, Modal, Portal, ActivityIndicator } from 'react-native-paper';
+import { Text, IconButton, Colors, Modal, Portal, ActivityIndicator } from 'react-native-paper';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import socketIOClient from "socket.io-client";
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -13,11 +14,13 @@ import { Audio } from 'expo-av';
 
 import MatchSummaryModal from './../components/MatchSummaryModal';
 import MatchEngine from './../engine/MatchEngine';
-import { setMatch, selectMatch, substractPointTeam, addPointTeam, cleanMatch, setDisabledButtons, selectDisabledButtons, selectSoundToPlay, cleanSoundToPlay } from './../reducers/match/matchSlice';
+import { setMatch, selectMatchError, selectMatch, substractPointTeam, addPointTeam, cleanMatch, setDisabledButtons, selectDisabledButtons, selectSoundToPlay, cleanSoundToPlay } from './../reducers/match/matchSlice';
 import { selectSoundEnabled } from './../reducers/sound/soundSlice';
 import { connectToSocket, emitMessage, disconnectSocket } from './../reducers/socket/socket.actions';
 import AdBanner from './../components/Ads/AdBanner';
 import Container from './../components/Container/Container';
+import WidthContainer from './../components/Container/WidthContainer';
+import Button from './../components/Buttons/Button';
 
 const styles = StyleSheet.create({
   container: {
@@ -63,6 +66,20 @@ const styles = StyleSheet.create({
   },
 });
 
+const InvalidMatchIdContainer = styled(WidthContainer)`
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+  margin: 0px auto;
+`;
+
+const InvalidMatchIdText = styled(Text)`
+  font-size: ${wp(10)}px;
+  text-align: center;
+`;
+
 const Match = ({route, navigation}) => {
 
   const dispatch = useDispatch();
@@ -76,7 +93,7 @@ const Match = ({route, navigation}) => {
   const soundEnabled = useSelector(selectSoundEnabled);
   const disabledButtons = useSelector(selectDisabledButtons);
   const soundToPlay = useSelector(selectSoundToPlay);
-
+  const error = useSelector(selectMatchError);
 
   const playSoundA = async () => {
     if (soundEnabled) {
@@ -135,27 +152,6 @@ const Match = ({route, navigation}) => {
   useEffect(() => {
     (async () => {
       if (route.params.online) {
-        dispatch(setMatch({
-          disabled_buttons: true,
-          id: null,
-          sets_number: route.params.sets,
-          status: null,
-          set_points_number: 25, // TODO: Change this
-          points_difference: 2, // TODO: Change this
-          tie_break_points: 15, // TODO: Change this
-          sets: [],
-          teams: {
-              team_one: {
-                  name: route.params.team_one_name,
-                  color: route.params.team_one_color,
-              },
-              team_two: {
-                  name: route.params.team_two_name,
-                  color: route.params.team_two_color,
-              }
-          },
-          winner: null,
-        }));
         await dispatch(connectToSocket());
         dispatch(emitMessage({
           destination: 'watch',
@@ -256,6 +252,21 @@ const Match = ({route, navigation}) => {
     setTimeout(
       () => {setDisplayCopiedMessage(false)},
       1000
+    );
+  }
+
+  if (error) {
+    return (
+      <InvalidMatchIdContainer>
+        <InvalidMatchIdText>
+          Codigo de partido invalido
+        </InvalidMatchIdText>
+        <Button
+          mode="contained"
+          text='Intentar de nuevo'
+          onPress={() => navigation.navigate('Home')}
+        />
+      </InvalidMatchIdContainer>
     );
   }
 

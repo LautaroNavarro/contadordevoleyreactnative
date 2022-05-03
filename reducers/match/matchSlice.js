@@ -5,6 +5,7 @@ const initialState = {
   instance: null,
   disabledButtons: false,
   soundToPlay: null,
+  error: null,
 };
 
 const PLAYING_STATUS = 'PLAYING';
@@ -24,6 +25,8 @@ const generateSet = () => {
   }
 }
 
+const MATCH_DOES_NOT_EXISTS_ERROR = 'Match does not exists';
+
 export const matchSlice = createSlice({
   name: 'match',
   initialState,
@@ -33,6 +36,7 @@ export const matchSlice = createSlice({
     },
     cleanMatch: (state) => {
       state.instance = null;
+      state.error = null;
     },
     setDisabledButtons: (state, action) => {
       state.instance.disabledButtons = action.payload;
@@ -102,28 +106,32 @@ export const matchSlice = createSlice({
   },
   extraReducers: {
     match_update: (state, action) => {
-      let soundToPlay = null;
-      if (state.instance?.sets.length > action.payload.sets.length) {
-        soundToPlay = 'add';
-      }
-      if (state.instance?.sets.length < action.payload.sets.length) {
-        soundToPlay = 'substract';
-      }
-      if (state.instance?.sets.length === action.payload.sets.length) {
-        const oldTeamOnePoints = state.instance?.sets[state.instance?.sets.length - 1].team_one;
-        const oldTeamTwoPoints = state.instance?.sets[state.instance?.sets.length - 1].team_two;
-        const newTeamOnePoints = action.payload?.sets[action.payload?.sets.length - 1].team_one;
-        const newTeamTwoPoints = action.payload?.sets[action.payload?.sets.length - 1].team_two;
-        if (oldTeamOnePoints > newTeamOnePoints || oldTeamTwoPoints > newTeamTwoPoints) {
+      if (action?.payload?.error) {
+        state.error = action.payload.error;
+      } else {
+        let soundToPlay = null;
+        if (state.instance?.sets.length > action.payload.sets.length) {
           soundToPlay = 'add';
-        } else {
+        }
+        if (state.instance?.sets.length < action.payload.sets.length) {
           soundToPlay = 'substract';
         }
+        if (state.instance?.sets.length === action.payload.sets.length) {
+          const oldTeamOnePoints = state.instance?.sets[state.instance?.sets.length - 1].team_one;
+          const oldTeamTwoPoints = state.instance?.sets[state.instance?.sets.length - 1].team_two;
+          const newTeamOnePoints = action.payload?.sets[action.payload?.sets.length - 1].team_one;
+          const newTeamTwoPoints = action.payload?.sets[action.payload?.sets.length - 1].team_two;
+          if (oldTeamOnePoints > newTeamOnePoints || oldTeamTwoPoints > newTeamTwoPoints) {
+            soundToPlay = 'add';
+          } else {
+            soundToPlay = 'substract';
+          }
+        }
+        state.instance = action.payload;
+        state.disabledButtons = false;
+        state.soundToPlay = soundToPlay;
       }
-      state.instance = action.payload;
-      state.disabledButtons = false;
-      state.soundToPlay = soundToPlay;
-    }
+      }
   }
 });
 
@@ -134,3 +142,4 @@ export const { cleanMatch, setMatch, addPointTeam, substractPointTeam, setDisabl
 export const selectMatch = state => state.match.instance;
 export const selectDisabledButtons = state => state.match.disabledButtons;
 export const selectSoundToPlay = state => state.match.soundToPlay;
+export const selectMatchError = state => state.match.error;

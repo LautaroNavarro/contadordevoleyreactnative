@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { StyleSheet, Image, View, KeyboardAvoidingView } from 'react-native';
-import { Text, Button, TextInput } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import * as yup from 'yup';
+import {Formik} from 'formik';
 
+import Button from './../components/Buttons/Button';
 import AdBanner from './../components/Ads/AdBanner';
 import Container from './../components/Container/Container';
+import WidthContainer from './../components/Container/WidthContainer';
+import TextInput from './../components/Inputs/TextInput';
 
 const styles = StyleSheet.create({
   logo: {
@@ -16,15 +21,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: hp('4%'),
   },
-  container: {
-    padding: hp('4%'),
-  },
-  item: {
-    marginTop: hp('2%'),
-  },
-  adContainer: {
+});
 
-  }
+const initialValues = {
+  matchCode: '',
+}
+
+const validationSchema = yup.object().shape({
+  matchCode: yup.string().min(6).max(6).required(),
 });
 
 const Home = ({navigation}) => {
@@ -47,13 +51,13 @@ const Home = ({navigation}) => {
     }
   }
 
-  const handleJoinMatch = () => {
+  const handleJoinMatch = (values) => {
     navigation.navigate(
       'Match',
       {
         online: true,
         token: null,
-        shareId: matchCode,
+        shareId: values.matchCode,
       }
     );
   }
@@ -68,26 +72,39 @@ const Home = ({navigation}) => {
       <View style={styles.logoContainer} >
         <Image source={require('./../assets/voley_logo.png')} style={styles.logo} />
       </View>
-      <View style={styles.container} >
+      <WidthContainer>
         <Button
-          style={styles.item}
           mode="contained"
-          title="Nuevo partido"
+          text='Nuevo partido'
           onPress={() => navigation.navigate('NewMatch')}
-        >Nuevo partido</Button>
-        <TextInput
-          style={styles.item}
-          label="Codigo de acceso"
-          value={matchCode}
-          onChangeText={handleMatchCodeChange}
         />
-        <Button
-          style={styles.item}
-          mode="contained"
-          title="Unirse a partido"
-          onPress={() => {handleJoinMatch()}}
-        >Unirse a partido</Button>
-      </View>
+        <Formik
+          initialValues={initialValues}
+          validateOnMount={true}
+          validationSchema={validationSchema}
+          onSubmit={handleJoinMatch}
+        >
+        {({values, handleChange, errors, isValid, handleSubmit, touched}) => {
+          return (
+            <>
+              <TextInput
+                maxLength={6}
+                label="Codigo de acceso"
+                value={values.matchCode}
+                onChangeText={handleChange('matchCode')}
+                feedback={touched.matchCode && errors.matchCode}
+              />
+              <Button
+                disabled={!isValid || Object.keys(errors).length !== 0}
+                mode="contained"
+                text="Unirse a partido"
+                onPress={handleSubmit}
+              />
+            </>
+          );
+        }}
+        </Formik>
+      </WidthContainer>
       <AdBanner />
       </KeyboardAvoidingView>
     </Container>
