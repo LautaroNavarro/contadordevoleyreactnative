@@ -5,7 +5,7 @@ import {KeyboardAvoidingView} from 'react-native';
 const Container = props => {
   return (
     <KeyboardAvoidingView
-      style={{flex: 1}}
+      style={{flex: 1, display: 'flex'}}
       behavior={'height'}
       enabled={false}
     >

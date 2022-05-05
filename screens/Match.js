@@ -21,6 +21,8 @@ import AdBanner from './../components/Ads/AdBanner';
 import Container from './../components/Container/Container';
 import WidthContainer from './../components/Container/WidthContainer';
 import Button from './../components/Buttons/Button';
+import Sets from './../components/Sets/Sets';
+
 
 const styles = StyleSheet.create({
   container: {
@@ -308,7 +310,7 @@ const Match = ({route, navigation}) => {
         <View style={styles.item}>
           <Text style={styles.teamNames} >{match.teams.team_one.name}</Text>
           <View style={styles.container} >
-            {getRenderedSets('team_one')}
+            <Sets sets_number={match.sets_number} setsWon={match.teams['team_one'].sets}/>
           </View>
           <View style={{...styles.teamCountersContainer, backgroundColor: match.teams.team_one.color, borderColor: match.teams.team_one.color}}>
             <Text style={{fontSize: wp('20%'), color: 'white'}} >{getCurrentSet() !== undefined ? getCurrentSet().team_one : 0}</Text>
@@ -341,7 +343,7 @@ const Match = ({route, navigation}) => {
         <View style={styles.item}>
           <Text style={styles.teamNames}>{match.teams.team_two.name}</Text>
           <View style={styles.container} >
-            {getRenderedSets('team_two')}
+            <Sets sets_number={match.sets_number} setsWon={match.teams['team_two'].sets}/>
           </View>
           <View style={{...styles.teamCountersContainer, backgroundColor: match.teams.team_two.color, borderColor: match.teams.team_two.color}}>
             <Text style={{fontSize: wp('20%'), color: 'white'}} >{getCurrentSet() !== undefined ? getCurrentSet().team_two : 0}</Text>

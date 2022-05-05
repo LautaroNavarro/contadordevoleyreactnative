@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import {widthPercentageToDP as wp} from 'react-native-responsive-screen';
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {AdMobBanner} from 'expo-ads-admob';
 
 const BannerContainer = styled.View`
   align-items: center;
   width: ${wp('100%')}px;
   margin-top: auto;
-  padding: 5px;
+  padding: ${hp(1)}px;
+  padding-bottom: ${hp(5)}px;
 `;
 
 const AdBanner = () => {

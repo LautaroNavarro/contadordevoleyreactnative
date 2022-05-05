@@ -57,7 +57,7 @@ const Home = ({navigation}) => {
       {
         online: true,
         token: null,
-        shareId: values.matchCode,
+        shareId: values.matchCode.toLowerCase(),
       }
     );
   }
@@ -105,8 +105,8 @@ const Home = ({navigation}) => {
         }}
         </Formik>
       </WidthContainer>
-      <AdBanner />
       </KeyboardAvoidingView>
+      <AdBanner />
     </Container>
   )
 }
