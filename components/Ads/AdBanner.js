@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {AdMobBanner} from 'expo-ads-admob';
@@ -12,34 +12,32 @@ const BannerContainer = styled.View`
 `;
 
 const AdBanner = () => {
-
   const [displayBanner, setDisplayBanner] = useState(false);
 
   const initAds = async () => {
     setDisplayBanner(true);
-  }
+  };
 
   useEffect(() => {
-    initAds().catch((error) => console.log(error));
+    initAds().catch(error => console.log(error)); // eslint-disable-line
   }, []);
 
-	return (
-		<>
-      {
-        displayBanner && (
-        	<BannerContainer>
-		        <AdMobBanner
-		          bannerSize="banner"
-		          adUnitID="ca-app-pub-1559311694967743/5371344310"
-		          servePersonalizedAds
-		          onDidFailToReceiveAdWithError={(err) => {
-		            console.log(err);
-		          }} />
-	        </BannerContainer>
-       )
-      }
-		</>
-	);
+  return (
+    <>
+      {displayBanner && (
+        <BannerContainer>
+          <AdMobBanner
+            bannerSize="banner"
+            adUnitID="ca-app-pub-1559311694967743/5371344310"
+            servePersonalizedAds
+            onDidFailToReceiveAdWithError={err => {
+              console.log(err); // eslint-disable-line
+            }}
+          />
+        </BannerContainer>
+      )}
+    </>
+  );
 };
 
 export default AdBanner;

@@ -1,11 +1,7 @@
-import React, { Component } from 'react';
-
-import { StyleSheet, View } from 'react-native';
-
-import { Text, Button, TextInput, Modal, Divider, DataTable } from 'react-native-paper';
-
-import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-
+import React, {Component} from 'react';
+import {StyleSheet, View} from 'react-native';
+import {Text, Modal, Divider, DataTable} from 'react-native-paper';
+import {widthPercentageToDP as wp} from 'react-native-responsive-screen';
 
 const styles = StyleSheet.create({
   modal: {
@@ -14,42 +10,43 @@ const styles = StyleSheet.create({
     backgroundColor: 'grey',
     padding: 20,
     margin: 20,
-    alignItems: 'center', 
-  }
+    alignItems: 'center',
+  },
 });
 
 class MatchSummaryModal extends Component {
-
-  getLosserTeam () {
-      if (this.props.match.winner === 'team_one') {
-          return this.props.match.teams.team_two;
-      } else {
-          return this.props.match.teams.team_one;
-      }
+  getLosserTeam() {
+    if (this.props.match.winner === 'team_one') {
+      return this.props.match.teams.team_two;
+    } else {
+      return this.props.match.teams.team_one;
+    }
   }
 
-  getSetsRendered () {
-      let setsRendered = [];
-      for (var i = 0; i < this.props.match.sets.length; i++) {
-          setsRendered.push(
-            <DataTable.Row key={`set-${i}`}>
-              <DataTable.Cell>{i + 1}</DataTable.Cell>
-              <DataTable.Cell>{this.props.match.sets[i].team_one}</DataTable.Cell>
-              <DataTable.Cell>{this.props.match.sets[i].team_two}</DataTable.Cell>
-            </DataTable.Row>
-          )
-      }
-      return setsRendered;
+  getSetsRendered() {
+    let setsRendered = [];
+    for (var i = 0; i < this.props.match.sets.length; i++) {
+      setsRendered.push(
+        <DataTable.Row key={`set-${i}`}>
+          <DataTable.Cell>{i + 1}</DataTable.Cell>
+          <DataTable.Cell>{this.props.match.sets[i].team_one}</DataTable.Cell>
+          <DataTable.Cell>{this.props.match.sets[i].team_two}</DataTable.Cell>
+        </DataTable.Row>,
+      );
+    }
+    return setsRendered;
   }
-  render () {
+  render() {
     return (
-      <Modal visible={this.props.visible} onDismiss={this.props.onDismiss} contentContainerStyle={styles.modal} >
+      <Modal visible={this.props.visible} onDismiss={this.props.onDismiss} contentContainerStyle={styles.modal}>
         <View>
-          <Text style={{fontSize:20}} >{`${this.props.match.teams[this.props.match.winner].name} le ganó a ${this.getLosserTeam().name} `}</Text>
+          <Text style={{fontSize: 20}}>{`${this.props.match.teams[this.props.match.winner].name} le ganó a ${
+            this.getLosserTeam().name
+          } `}</Text>
           <Text>{`${this.props.match.teams[this.props.match.winner].sets} a ${this.getLosserTeam().sets}`}</Text>
           <Divider style={{marginTop: 10, marginBottom: 10, paddingTop: 3}} />
           <Text>Detalles de sets</Text>
-          <View style={{width: wp('80%')}} >
+          <View style={{width: wp('80%')}}>
             <DataTable>
               <DataTable.Header>
                 <DataTable.Title>#</DataTable.Title>
@@ -61,9 +58,8 @@ class MatchSummaryModal extends Component {
           </View>
         </View>
       </Modal>
-    )
+    );
   }
 }
-
 
 export default MatchSummaryModal;

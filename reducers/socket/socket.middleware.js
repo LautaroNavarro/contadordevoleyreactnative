@@ -1,19 +1,12 @@
-import socketIOClient from "socket.io-client";
+import socketIOClient from 'socket.io-client';
 
-import {
-  socketConnected,
-  socketDisconnected,
-  socketError,
-  socketSubscribe,
-} from './socket.actions';
-
-import { subscribeToTopic } from './socket.actions';
+import {socketConnected, socketDisconnected} from './socket.slice';
 
 const onClose = store => () => {
   store.dispatch(socketDisconnected());
 };
 
-const onConnect = (store) => () => {
+const onConnect = store => () => {
   store.dispatch(socketConnected());
 };
 
@@ -23,21 +16,21 @@ const onError = store => () => {
 };
 
 const onMessage = (store, onMessageAction) => (type, message) => {
-  store.dispatch(onMessageAction({
-    type: type,
-    message: message,
-  }));
+  store.dispatch(
+    onMessageAction({
+      type: type,
+      message: message,
+    }),
+  );
 };
 
 const socketMiddleware = () => {
-
   let socket = null;
 
   return store => next => async action => {
     switch (action.type) {
       case 'WS_CONNECT': {
-
-        const { onMessageAction } = action.payload;
+        const {onMessageAction} = action.payload;
 
         if (socket !== null) {
           socket.disconnect(true);
@@ -45,45 +38,30 @@ const socketMiddleware = () => {
 
         socket = socketIOClient('https://contadordevoleybejs.herokuapp.com/');
 
-        socket.on(
-          'connect',
-          () => {
-            onConnect(store);
-          }
-        );
+        socket.on('connect', () => {
+          onConnect(store);
+        });
 
-        socket.on(
-          'connect_error',
-          (data) => {
-            onError(store);
-          }
-        );
+        socket.on('connect_error', () => {
+          onError(store);
+        });
 
-        socket.on(
-          'disconnect',
-          () => {
-            onClose(store);
-          }
-        );
+        socket.on('disconnect', () => {
+          onClose(store);
+        });
 
-        socket.onAny(
-          onMessage(store, onMessageAction)
-        );
+        socket.onAny(onMessage(store, onMessageAction));
 
         break;
       }
       case 'WS_EMIT_MESSAGE': {
-
-        const { destination, body } = action.payload;
-        if(!socket){
+        const {destination, body} = action.payload;
+        if (!socket) {
           store.dispatch(socketDisconnected());
           return;
         }
 
-        socket.emit(
-          destination,
-          body
-        );
+        socket.emit(destination, body);
 
         // store.dispatch(socketSubscribe(topic));
 
