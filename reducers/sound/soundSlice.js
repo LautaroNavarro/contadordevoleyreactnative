@@ -1,4 +1,6 @@
-import { createSlice } from '@reduxjs/toolkit';
+import {createSlice} from '@reduxjs/toolkit';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {persistReducer} from 'redux-persist';
 
 const initialState = {
   enabled: true,
@@ -8,15 +10,20 @@ export const soundSlice = createSlice({
   name: 'sound',
   initialState,
   reducers: {
-    changeEnabled: (state) => {
+    changeEnabled: state => {
       state.enabled = !state.enabled;
     },
   },
 });
 
-export default soundSlice.reducer;
+const soundPersistConfig = {
+  key: 'sound',
+  storage: AsyncStorage,
+  whitelist: ['enabled'],
+};
 
-export const { changeEnabled } = soundSlice.actions;
+export default persistReducer(soundPersistConfig, soundSlice.reducer);
+
+export const {changeEnabled} = soundSlice.actions;
 
 export const selectSoundEnabled = state => state.sound.enabled;
-

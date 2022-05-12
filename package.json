@@ -5,9 +5,15 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "lint": "eslint .",
+    "lint-fix": "eslint --fix .",
+    "prettier": "prettier --check './**/*.js' '*.js'",
+    "prettier-fix": "prettier --write './**/*.js' '*.js'",
+    "prepare": "husky install",
     "eject": "expo eject"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.17.3",
     "@react-native-community/masked-view": "0.1.10",
     "@react-navigation/drawer": "^5.12.9",
     "@react-navigation/native": "^5.9.8",
@@ -33,16 +39,40 @@
     "react-native-responsive-screen": "^1.4.2",
     "react-native-safe-area-context": "3.2.0",
     "react-native-screens": "~3.4.0",
+    "react-native-toast-message": "^2.1.5",
     "react-native-vector-icons": "^8.1.0",
     "react-native-web": "~0.13.12",
     "react-redux": "^7.2.6",
     "redux": "^4.1.2",
+    "redux-persist": "^6.0.0",
     "socket.io-client": "^4.2.0",
     "styled-components": "^5.3.5",
     "yup": "^0.32.11"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.0"
+    "@babel/core": "^7.9.0",
+    "husky": "^7.0.4",
+    "eslint": "7.14.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-react": "^7.29.3",
+    "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
+    "prettier": "2.6.0",
+    "lint-staged": "^12.3.5"
   },
-  "private": true
+  "private": true,
+  "eslintConfig": {
+    "root": true,
+    "extends": "react-app"
+  },
+  "lint-staged": {
+    "./**/*.{js,jsx,ts,tsx,css}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "App.js": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  }
 }

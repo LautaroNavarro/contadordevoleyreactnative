@@ -1,5 +1,7 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { DarkTheme, DefaultTheme } from 'react-native-paper';
+import {createSlice} from '@reduxjs/toolkit';
+import {DarkTheme, DefaultTheme} from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {persistReducer} from 'redux-persist';
 
 const StyledDarkTheme = {
   ...DarkTheme,
@@ -32,15 +34,21 @@ export const themeSlice = createSlice({
   name: 'theme',
   initialState,
   reducers: {
-    changeTheme: (state) => {
+    changeTheme: state => {
       state.theme = state.theme === DARK_THEME ? LIGHT_THEME : DARK_THEME;
     },
   },
 });
 
-export default themeSlice.reducer;
+const themePersistConfig = {
+  key: 'theme',
+  storage: AsyncStorage,
+  whitelist: ['theme'],
+};
 
-export const { changeTheme } = themeSlice.actions;
+export default persistReducer(themePersistConfig, themeSlice.reducer);
 
-export const selectTheme = state => state.theme.theme === DARK_THEME ? StyledDarkTheme : StyledLightTheme;
+export const {changeTheme} = themeSlice.actions;
+
+export const selectTheme = state => (state.theme.theme === DARK_THEME ? StyledDarkTheme : StyledLightTheme);
 export const selectIsDarkTheme = state => state.theme.theme === DARK_THEME;

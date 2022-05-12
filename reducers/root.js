@@ -1,9 +1,10 @@
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
-import { combineReducers } from 'redux';
+import {configureStore, getDefaultMiddleware} from '@reduxjs/toolkit';
+import {combineReducers} from 'redux';
 
 import match from './match/matchSlice';
 import theme from './theme/themeSlice';
 import sound from './sound/soundSlice';
+import loading from './loading/loadingSlice';
 import socket from './socket/socket.slice';
 import socketMiddleware from './socket/socket.middleware';
 
@@ -12,14 +13,15 @@ const middleware = [
     serializableCheck: false,
   }),
   socketMiddleware(),
-  	// We need to add the websocket middleware here
+  // We need to add the websocket middleware here
 ];
 
 const rootReducer = combineReducers({
-	socket,
+  socket,
   match,
   theme,
   sound,
+  loading,
 });
 
 export const createStore = initialState =>
@@ -27,4 +29,4 @@ export const createStore = initialState =>
     reducer: rootReducer,
     preloadedState: initialState,
     middleware,
-});
+  });

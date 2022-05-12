@@ -1,4 +1,7 @@
-import { createSlice } from '@reduxjs/toolkit';
+import {createSlice} from '@reduxjs/toolkit';
+
+//import apiReducerBuilder from './../../utils/apiReducerBuilder';
+//import {createMatch} from './thunks';
 
 const initialState = {
   loading: false,
@@ -14,27 +17,28 @@ const DEFAULT_SETS_NUMBER = 5;
 const DEFAULT_SET_POINTS_NUMBER = 25;
 const DEFAULT_POINTS_DIFFERENCE = 2;
 const DEFAULT_TIE_BREAK_POINTS = 15;
-const TEAM_ONE = 'team_one';
-const TEAM_TWO = 'team_two';
 
 const generateSet = () => {
   return {
-    'team_one': 0,
-    'team_two': 0,
-    'winner': null,
-  }
-}
-
-const MATCH_DOES_NOT_EXISTS_ERROR = 'Match does not exists';
+    team_one: 0,
+    team_two: 0,
+    winner: null,
+  };
+};
 
 export const matchSlice = createSlice({
   name: 'match',
   initialState,
+  // extraReducers: builder => {
+  //   apiReducerBuilder(builder, createMatch, (state, action) => {
+  //     // console.log(action.payload);
+  //   });
+  // },
   reducers: {
-    cleanSoundToPlay: (state) => {
+    cleanSoundToPlay: state => {
       state.soundToPlay = null;
     },
-    cleanMatch: (state) => {
+    cleanMatch: state => {
       state.instance = null;
       state.error = null;
     },
@@ -46,9 +50,15 @@ export const matchSlice = createSlice({
       action.payload.teams.team_one.sets = action.payload.teams.team_one.sets ? action.payload.teams.team_one.sets : 0;
       action.payload.teams.team_two.sets = action.payload.teams.team_two.sets ? action.payload.teams.team_two.sets : 0;
       action.payload.sets_number = action.payload.sets_number ? action.payload.sets_number : DEFAULT_SETS_NUMBER;
-      action.payload.set_points_number = action.payload.set_points_number ? action.payload.set_points_number : DEFAULT_SET_POINTS_NUMBER;
-      action.payload.points_difference = action.payload.points_difference ? action.payload.points_difference : DEFAULT_POINTS_DIFFERENCE;
-      action.payload.tie_break_points = action.payload.tie_break_points ? action.payload.tie_break_points : DEFAULT_TIE_BREAK_POINTS;
+      action.payload.set_points_number = action.payload.set_points_number
+        ? action.payload.set_points_number
+        : DEFAULT_SET_POINTS_NUMBER;
+      action.payload.points_difference = action.payload.points_difference
+        ? action.payload.points_difference
+        : DEFAULT_POINTS_DIFFERENCE;
+      action.payload.tie_break_points = action.payload.tie_break_points
+        ? action.payload.tie_break_points
+        : DEFAULT_TIE_BREAK_POINTS;
       action.payload.status = action.payload.status ? action.payload.status : PLAYING_STATUS;
       action.payload.winner = action.payload.winner ? action.payload.winner : null;
 
@@ -62,26 +72,27 @@ export const matchSlice = createSlice({
         let index = state.instance.sets.length - 1;
         state.instance.sets[index][team_points] = state.instance.sets[index][team_points] + 1;
         if (
-            state.instance.sets[index][team_points] >= (state.instance.sets[index][other_team_points] + state.instance.points_difference ) &&
-            state.instance.sets[index][team_points] >= state.instance.set_points_number || 
-            state.instance.sets.length === (state.instance.sets_number) && state.instance.sets[index][team_points] >= (state.instance.sets[index][other_team_points] + state.instance.points_difference ) &&
-            state.instance.sets[index][team_points] >= state.instance.tie_break_points
+          (state.instance.sets[index][team_points] >=
+            state.instance.sets[index][other_team_points] + state.instance.points_difference &&
+            state.instance.sets[index][team_points] >= state.instance.set_points_number) ||
+          (state.instance.sets.length === state.instance.sets_number &&
+            state.instance.sets[index][team_points] >=
+              state.instance.sets[index][other_team_points] + state.instance.points_difference &&
+            state.instance.sets[index][team_points] >= state.instance.tie_break_points)
         ) {
-            // The set finished?
+          // The set finished?
 
-            state.instance.teams[team_points].sets = state.instance.teams[team_points].sets + 1; // Register that the team win a set
-            state.instance.sets[index].winner = team_points; // Register that state set was winned by the team
+          state.instance.teams[team_points].sets = state.instance.teams[team_points].sets + 1; // Register that the team win a set
+          state.instance.sets[index].winner = team_points; // Register that state set was winned by the team
 
-            if (
-                state.instance.teams[team_points].sets >= Math.ceil(state.instance.sets_number / 2)
-            ){
-                // The match finished?
-                state.instance.status = FINISHED_STATUS;
-                state.instance.winner = team_points;
-            } else {
-                // Create new set
-                state.instance.sets.push(generateSet());
-            }
+          if (state.instance.teams[team_points].sets >= Math.ceil(state.instance.sets_number / 2)) {
+            // The match finished?
+            state.instance.status = FINISHED_STATUS;
+            state.instance.winner = team_points;
+          } else {
+            // Create new set
+            state.instance.sets.push(generateSet());
+          }
         }
       }
     },
@@ -90,19 +101,21 @@ export const matchSlice = createSlice({
       if (state.instance && state.instance.status !== FINISHED_STATUS) {
         let index = state.instance.sets.length - 1;
         let team_points = team === 1 ? 'team_one' : 'team_two';
-        if (state.instance.sets[index][team_points] === 0){
-            if (state.instance.sets.length !== 1){
-              state.instance.sets.pop();
-              let index = state.instance.sets.length - 1;
-              state.instance.teams[state.instance.sets[index].winner].sets = state.instance.teams[state.instance.sets[index].winner].sets - 1;
-              state.instance.sets[index][state.instance.sets[index].winner] = state.instance.sets[index][state.instance.sets[index].winner] - 1;
-              state.instance.sets[index].winner = null;
-            }
+        if (state.instance.sets[index][team_points] === 0) {
+          if (state.instance.sets.length !== 1) {
+            state.instance.sets.pop();
+            let index = state.instance.sets.length - 1;
+            state.instance.teams[state.instance.sets[index].winner].sets =
+              state.instance.teams[state.instance.sets[index].winner].sets - 1;
+            state.instance.sets[index][state.instance.sets[index].winner] =
+              state.instance.sets[index][state.instance.sets[index].winner] - 1;
+            state.instance.sets[index].winner = null;
+          }
         } else {
-            state.instance.sets[index][team_points] = state.instance.sets[index][team_points] - 1;
+          state.instance.sets[index][team_points] = state.instance.sets[index][team_points] - 1;
         }
       }
-    }
+    },
   },
   extraReducers: {
     match_update: (state, action) => {
@@ -131,13 +144,14 @@ export const matchSlice = createSlice({
         state.disabledButtons = false;
         state.soundToPlay = soundToPlay;
       }
-      }
-  }
+    },
+  },
 });
 
 export default matchSlice.reducer;
 
-export const { cleanMatch, setMatch, addPointTeam, substractPointTeam, setDisabledButtons, cleanSoundToPlay } = matchSlice.actions;
+export const {cleanMatch, setMatch, addPointTeam, substractPointTeam, setDisabledButtons, cleanSoundToPlay} =
+  matchSlice.actions;
 
 export const selectMatch = state => state.match.instance;
 export const selectDisabledButtons = state => state.match.disabledButtons;

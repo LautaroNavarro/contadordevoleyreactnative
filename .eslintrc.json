@@ -1,0 +1,57 @@
+{
+  "env": {
+    "node": true,
+    "browser": true,
+    "es2020": true,
+    "jest": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "prettier"
+  ],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 11,
+    "sourceType": "module"
+  },
+  "plugins": ["react", "import", "sort-imports-es6-autofix"],
+  "rules": {
+    "no-console": "error",
+    "no-debugger": "error",
+    "eqeqeq": ["error", "always"],
+    "no-unused-vars": ["error", { "ignoreRestSiblings": true }],
+    "import/no-unresolved": "off",
+    "import/named": "error",
+    "import/namespace": "off",
+    "import/default": "off",
+    "import/no-named-as-default": "off",
+    "import/export": "error",
+    "import/no-duplicates": "error",
+    // "import/no-cycle": "error",
+    "react/prop-types": 1,
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index"
+        ],
+        "newlines-between": "always"
+      }
+    ]
+    // "sort-imports-es6-autofix/sort-imports-es6": ["error", {
+    //   "ignoreCase": false,
+    //   "ignoreMemberSort": false,
+    //   "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+    // }]
+  }
+}
