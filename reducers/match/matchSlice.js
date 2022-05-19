@@ -1,7 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit';
 
-//import apiReducerBuilder from './../../utils/apiReducerBuilder';
-//import {createMatch} from './thunks';
+import apiReducerBuilder from './../../utils/apiReducerBuilder';
+import {createMatch} from './thunks';
 
 const initialState = {
   loading: false,
@@ -9,6 +9,7 @@ const initialState = {
   disabledButtons: false,
   soundToPlay: null,
   error: null,
+  reversed: false,
 };
 
 const PLAYING_STATUS = 'PLAYING';
@@ -29,12 +30,10 @@ const generateSet = () => {
 export const matchSlice = createSlice({
   name: 'match',
   initialState,
-  // extraReducers: builder => {
-  //   apiReducerBuilder(builder, createMatch, (state, action) => {
-  //     // console.log(action.payload);
-  //   });
-  // },
   reducers: {
+    toggleReversed: state => {
+      state.reversed = !state.reversed;
+    },
     cleanSoundToPlay: state => {
       state.soundToPlay = null;
     },
@@ -117,8 +116,12 @@ export const matchSlice = createSlice({
       }
     },
   },
-  extraReducers: {
-    match_update: (state, action) => {
+  extraReducers: builder => {
+    apiReducerBuilder(builder, createMatch, (state, action) => {
+      state.loading = false;
+      state.instance = action.payload.match;
+    });
+    builder.addCase('match_update', (state, action) => {
       if (action?.payload?.error) {
         state.error = action.payload.error;
       } else {
@@ -144,16 +147,25 @@ export const matchSlice = createSlice({
         state.disabledButtons = false;
         state.soundToPlay = soundToPlay;
       }
-    },
+    });
   },
 });
 
 export default matchSlice.reducer;
 
-export const {cleanMatch, setMatch, addPointTeam, substractPointTeam, setDisabledButtons, cleanSoundToPlay} =
-  matchSlice.actions;
+export const {
+  toggleReversed,
+  cleanMatch,
+  setMatch,
+  addPointTeam,
+  substractPointTeam,
+  setDisabledButtons,
+  cleanSoundToPlay,
+} = matchSlice.actions;
 
 export const selectMatch = state => state.match.instance;
+export const selectLoadingMatch = state => state.match.loading;
+export const selectedReversed = state => state.match.reversed;
 export const selectDisabledButtons = state => state.match.disabledButtons;
 export const selectSoundToPlay = state => state.match.soundToPlay;
 export const selectMatchError = state => state.match.error;

@@ -10,7 +10,8 @@ const Container = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 0px;
+  padding: 15px 10px;
+  padding-right: 0px;
 `;
 
 const LabelText = styled.Text`

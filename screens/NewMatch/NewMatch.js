@@ -1,10 +1,11 @@
-import React, {useState} from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import {RadioButton, ActivityIndicator, Modal, Portal} from 'react-native-paper';
+import {ScrollView} from 'react-native';
+import {RadioButton} from 'react-native-paper';
 import {fromHsv} from 'react-native-color-picker';
-import axios from 'axios';
 import * as yup from 'yup';
 import {Formik} from 'formik';
+import {useTranslation} from 'react-i18next';
 
 import AdBanner from './../../components/Ads/AdBanner';
 import Container from './../../components/Container/Container';
@@ -13,6 +14,8 @@ import WidthContainer from './../../components/Container/WidthContainer';
 import Button from './../../components/Buttons/Button';
 import Divider from './../../components/Divider/Divider';
 import TeamInput from './components/TeamInput';
+import useSyncEndpointCall from './../../utils/syncEndpointCall.js';
+import {createMatch} from './../../reducers/match/thunks';
 
 const TeamInputsContainer = styled(WidthContainer)`
   display: flex;
@@ -51,7 +54,8 @@ const validationSchema = yup.object().shape({
 });
 
 const NewMatch = ({navigation}) => {
-  const [loading, setLoading] = useState(false);
+  const {t} = useTranslation();
+  const syncEndpointCall = useSyncEndpointCall();
 
   const createOnlineMatch = async ({
     set_points_number,
@@ -63,8 +67,6 @@ const NewMatch = ({navigation}) => {
     team_one_color,
     team_two_color,
   }) => {
-    setLoading(true);
-
     const body = {
       sets_number: parseInt(sets),
       set_points_number,
@@ -72,40 +74,41 @@ const NewMatch = ({navigation}) => {
       tie_break_points,
       teams: {
         team_one: {
-          name: team_one_name ? team_one_name : 'Equipo A',
+          name: team_one_name ? team_one_name : t('team_a'),
           color: fromHsv(team_one_color),
         },
         team_two: {
-          name: team_two_name ? team_two_name : 'Equipo B',
+          name: team_two_name ? team_two_name : t('team_b'),
           color: fromHsv(team_two_color),
         },
       },
     };
-
-    let response;
-    try {
-      response = await axios.post('/matches/', body);
-    } catch (error) {
-      setLoading(false);
-      return null;
-    }
-    setLoading(false);
-    navigation.navigate('Match', {
-      team_one_name: team_one_name,
-      team_two_name: team_two_name,
-      team_one_color: fromHsv(team_one_color),
-      team_two_color: fromHsv(team_two_color),
-      sets: sets,
-      online: true,
-      token: response.data.match.token,
-      shareId: response.data.match.id,
+    syncEndpointCall({
+      loadingText: t('creating_match'),
+      reduxAction: createMatch({
+        ...body,
+      }),
+      errorText: t('there_was_an_error_creating_your_match'),
+      successText: false,
+      successCallback: response => {
+        navigation.navigate('Match', {
+          team_one_name: team_one_name,
+          team_two_name: team_two_name,
+          team_one_color: fromHsv(team_one_color),
+          team_two_color: fromHsv(team_two_color),
+          sets: sets,
+          online: true,
+          token: response.payload.match.token,
+          shareId: response.payload.match.id,
+        });
+      },
     });
   };
 
   const createLocalMatch = async ({team_one_name, team_two_name, team_one_color, team_two_color, sets}) => {
     navigation.navigate('Match', {
-      team_one_name: team_one_name ? team_one_name : 'Equipo A',
-      team_two_name: team_two_name ? team_two_name : 'Equipo B',
+      team_one_name: team_one_name ? team_one_name : t('team_a'),
+      team_two_name: team_two_name ? team_two_name : t('team_b'),
       team_one_color: fromHsv(team_one_color),
       team_two_color: fromHsv(team_two_color),
       sets: sets,
@@ -123,59 +126,52 @@ const NewMatch = ({navigation}) => {
 
   return (
     <Container>
-      {loading && (
-        <>
-          <Portal>
-            <Modal visible={true} dismissable={false}>
-              <ActivityIndicator animating={true} />
-            </Modal>
-          </Portal>
-        </>
-      )}
-      <Formik
-        initialValues={initialValues}
-        validateOnMount={true}
-        validationSchema={validationSchema}
-        onSubmit={handleCreateMatch}
-      >
-        {({values, handleChange, handleSubmit, setFieldValue}) => {
-          return (
-            <>
-              <TeamInputsContainer>
-                <TeamInput
-                  nameLabel="Equipo A"
-                  nameValue={values.team_one_name}
-                  onNameChange={handleChange('team_one_name')}
-                  colorValue={values.team_one_color}
-                  onColorChange={value => setFieldValue('team_one_color', value)}
-                />
-                <TeamInput
-                  nameLabel="Equipo B"
-                  nameValue={values.team_two_name}
-                  onNameChange={handleChange('team_two_name')}
-                  colorValue={values.team_two_color}
-                  onColorChange={value => setFieldValue('team_two_color', value)}
-                />
-              </TeamInputsContainer>
-              <WidthContainer>
-                <Divider />
-                <RadioButton.Group onValueChange={value => setFieldValue('sets', value)} value={values.sets}>
-                  <RadioButton.Item label="Al mejor de 1 set" value="1" />
-                  <RadioButton.Item label="Al mejor de 3 sets" value="3" />
-                  <RadioButton.Item label="Al mejor de 5 sets" value="5" />
-                </RadioButton.Group>
-                <Divider />
-                <Switch
-                  label={'Partido online'}
-                  value={values.online_match}
-                  onValueChange={value => setFieldValue('online_match', value)}
-                />
-                <Button mode="contained" text="Crear partido" onPress={handleSubmit} />
-              </WidthContainer>
-            </>
-          );
-        }}
-      </Formik>
+      <ScrollView>
+        <Formik
+          initialValues={initialValues}
+          validateOnMount={true}
+          validationSchema={validationSchema}
+          onSubmit={handleCreateMatch}
+        >
+          {({values, handleChange, handleSubmit, setFieldValue}) => {
+            return (
+              <>
+                <TeamInputsContainer>
+                  <TeamInput
+                    nameLabel={t('team_a')}
+                    nameValue={values.team_one_name}
+                    onNameChange={handleChange('team_one_name')}
+                    colorValue={values.team_one_color}
+                    onColorChange={value => setFieldValue('team_one_color', value)}
+                  />
+                  <TeamInput
+                    nameLabel={t('team_b')}
+                    nameValue={values.team_two_name}
+                    onNameChange={handleChange('team_two_name')}
+                    colorValue={values.team_two_color}
+                    onColorChange={value => setFieldValue('team_two_color', value)}
+                  />
+                </TeamInputsContainer>
+                <WidthContainer>
+                  <Divider />
+                  <RadioButton.Group onValueChange={value => setFieldValue('sets', value)} value={values.sets}>
+                    <RadioButton.Item label={t('best_of_sets', {sets: 1})} value="1" />
+                    <RadioButton.Item label={t('best_of_sets', {sets: 3})} value="3" />
+                    <RadioButton.Item label={t('best_of_sets', {sets: 5})} value="5" />
+                  </RadioButton.Group>
+                  <Divider />
+                  <Switch
+                    label={t('online_match')}
+                    value={values.online_match}
+                    onValueChange={value => setFieldValue('online_match', value)}
+                  />
+                  <Button mode="contained" text={t('create_match')} onPress={handleSubmit} />
+                </WidthContainer>
+              </>
+            );
+          }}
+        </Formik>
+      </ScrollView>
       <AdBanner />
     </Container>
   );

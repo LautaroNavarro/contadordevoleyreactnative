@@ -35,15 +35,3 @@ const TeamInput = ({nameValue, nameLabel, onNameChange, colorValue, onColorChang
 };
 
 export default TeamInput;
-
-// <View style={{width: wp('40%'), height: wp('40%'), margin: wp('5%')}}>
-//   <View style={{flex: 1}}>
-//     <ColorPicker
-//       color={ teamOneColor }
-//       onColorChange={ (color) => handleChangeTeamOneColor(color) }
-//       hideSliders={true}
-//       style={{flex: 1}}
-//     />
-//   </View>
-// </View>
-// </View>

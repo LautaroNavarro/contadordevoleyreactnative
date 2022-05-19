@@ -5,6 +5,8 @@ import match from './match/matchSlice';
 import theme from './theme/themeSlice';
 import sound from './sound/soundSlice';
 import loading from './loading/loadingSlice';
+import language from './language/languageSlice';
+import responsive from './responsive/responsiveSlice';
 import socket from './socket/socket.slice';
 import socketMiddleware from './socket/socket.middleware';
 
@@ -22,6 +24,8 @@ const rootReducer = combineReducers({
   theme,
   sound,
   loading,
+  responsive,
+  language,
 });
 
 export const createStore = initialState =>

@@ -1,9 +1,9 @@
-const apiReducerBuilder = (builder, thunk) => {
+const apiReducerBuilder = (builder, thunk, fulfilledCb) => {
   return builder
     .addCase(thunk.pending, state => {
       state.loading = true;
     })
-    .addCase(thunk.fulfilled, (state, action, fulfilledCb) => {
+    .addCase(thunk.fulfilled, (state, action) => {
       state.loading = false;
       if (fulfilledCb) {
         fulfilledCb(state, action);

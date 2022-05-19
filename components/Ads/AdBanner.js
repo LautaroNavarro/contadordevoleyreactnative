@@ -1,14 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import {Platform} from 'react-native';
 import {AdMobBanner} from 'expo-ads-admob';
 
 const BannerContainer = styled.View`
   align-items: center;
-  width: ${wp('100%')}px;
+  justify-content: center;
+  width: 100%;
   margin-top: auto;
-  padding: ${hp(1)}px;
-  padding-bottom: ${hp(5)}px;
+  padding: 1%;
+  padding-bottom: 1%;
 `;
 
 const AdBanner = () => {
@@ -21,6 +22,10 @@ const AdBanner = () => {
   useEffect(() => {
     initAds().catch(error => console.log(error)); // eslint-disable-line
   }, []);
+
+  if (Platform.OS === 'ios') {
+    return null;
+  }
 
   return (
     <>

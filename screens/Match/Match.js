@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import styled from 'styled-components';
 import {useDispatch, useSelector} from 'react-redux';
-import {Clipboard} from 'react-native';
-import {Text, Modal, Portal, ActivityIndicator} from 'react-native-paper';
+import {Clipboard, ScrollView} from 'react-native';
+import {Text, Modal, ActivityIndicator, IconButton} from 'react-native-paper';
 import {widthPercentageToDP as wp} from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {Audio} from 'expo-av';
+import {useTranslation} from 'react-i18next';
 
 import MatchSummaryModal from './../../components/MatchSummaryModal';
 import {
@@ -15,9 +16,11 @@ import {
   substractPointTeam,
   addPointTeam,
   cleanMatch,
+  toggleReversed,
   setDisabledButtons,
   selectDisabledButtons,
   selectSoundToPlay,
+  selectedReversed,
   cleanSoundToPlay,
 } from './../../reducers/match/matchSlice';
 import {selectSoundEnabled} from './../../reducers/sound/soundSlice';
@@ -92,9 +95,19 @@ const InvalidMatchIdText = styled(Text)`
   text-align: center;
 `;
 
+const ReverseContainer = styled.View`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: ${wp(12)}px;
+  padding: 0px;
+`;
+
 const Match = ({route, navigation}) => {
   const dispatch = useDispatch();
   const match = useSelector(selectMatch);
+  const reversed = useSelector(selectedReversed);
+  const {t} = useTranslation();
 
   const [dismissModal, setDismissModal] = useState(false);
   const [displayCopiedMessage, setDisplayCopiedMessage] = useState(false);
@@ -253,8 +266,8 @@ const Match = ({route, navigation}) => {
   if (error) {
     return (
       <InvalidMatchIdContainer>
-        <InvalidMatchIdText>Codigo de partido invalido</InvalidMatchIdText>
-        <Button mode="contained" text="Intentar de nuevo" onPress={() => navigation.navigate('Home')} />
+        <InvalidMatchIdText>{t('invalid_access_code')}</InvalidMatchIdText>
+        <Button mode="contained" text={t('try_again')} onPress={() => navigation.navigate('Home')} />
       </InvalidMatchIdContainer>
     );
   }
@@ -267,64 +280,81 @@ const Match = ({route, navigation}) => {
     );
   }
 
+  let teamBoards = [
+    <TeamBoard
+      key="team_board_1"
+      teamName={match.teams.team_one.name}
+      teamSets={match.teams['team_one'].sets}
+      matchSets={match.sets_number}
+      teamColor={match.teams.team_one.color}
+      teamCurrentSetPoints={getCurrentSet() !== undefined ? getCurrentSet().team_one : 0}
+      isAdmin={(route.params.online && route.params.token) || !route.params.online}
+      disabledButtons={route.params.online ? disabledButtons : false}
+      substractPointTeamLocal={() => substractPointTeamLocal(1)}
+      addPointTeamLocal={() => addPointTeamLocal(1)}
+    />,
+    <ReverseContainer key="team_board_icon">
+      <IconButton
+        icon="swap-horizontal"
+        size={wp('8%')}
+        onPress={() => {
+          dispatch(toggleReversed());
+        }}
+      />
+    </ReverseContainer>,
+    <TeamBoard
+      key="team_board_2"
+      teamName={match.teams.team_two.name}
+      teamSets={match.teams['team_two'].sets}
+      matchSets={match.sets_number}
+      teamColor={match.teams.team_two.color}
+      teamCurrentSetPoints={getCurrentSet() !== undefined ? getCurrentSet().team_two : 0}
+      isAdmin={(route.params.online && route.params.token) || !route.params.online}
+      disabledButtons={route.params.online ? disabledButtons : false}
+      substractPointTeamLocal={() => substractPointTeamLocal(2)}
+      addPointTeamLocal={() => addPointTeamLocal(2)}
+    />,
+  ];
+
+  if (reversed) {
+    teamBoards.reverse();
+  }
+
   return (
     <Container>
-      <Portal>
-        {match.winner !== null ? (
-          <MatchSummaryModal
-            visible={!dismissModal}
-            match={match}
-            onDismiss={() => {
-              dismissModalFunc();
-            }}
-          />
-        ) : null}
-      </Portal>
-      {route.params.online && (
-        <ShareContainer>
-          <ShareSubContainer>
-            <Icon.Button
-              name="copy"
-              backgroundColor="#d8358d"
-              onPress={() => {
-                copyToIdClipBoard();
-              }}
-            >
-              {route.params.shareId.toUpperCase()}
-            </Icon.Button>
-            {displayCopiedMessage && (
-              <CopiedMessageContainer>
-                <Triangle />
-                <CopiedMessage>Copiado!</CopiedMessage>
-              </CopiedMessageContainer>
-            )}
-          </ShareSubContainer>
-        </ShareContainer>
-      )}
-      <BoardsContainer>
-        <TeamBoard
-          teamName={match.teams.team_one.name}
-          teamSets={match.teams['team_one'].sets}
-          matchSets={match.sets_number}
-          teamColor={match.teams.team_one.color}
-          teamCurrentSetPoints={getCurrentSet() !== undefined ? getCurrentSet().team_one : 0}
-          isAdmin={(route.params.online && route.params.token) || !route.params.online}
-          disabledButtons={route.params.online ? disabledButtons : false}
-          substractPointTeamLocal={() => substractPointTeamLocal(1)}
-          addPointTeamLocal={() => addPointTeamLocal(1)}
+      {match.winner !== null ? (
+        <MatchSummaryModal
+          visible={!dismissModal}
+          match={match}
+          onDismiss={() => {
+            dismissModalFunc();
+          }}
         />
-        <TeamBoard
-          teamName={match.teams.team_two.name}
-          teamSets={match.teams['team_two'].sets}
-          matchSets={match.sets_number}
-          teamColor={match.teams.team_two.color}
-          teamCurrentSetPoints={getCurrentSet() !== undefined ? getCurrentSet().team_two : 0}
-          isAdmin={(route.params.online && route.params.token) || !route.params.online}
-          disabledButtons={route.params.online ? disabledButtons : false}
-          substractPointTeamLocal={() => substractPointTeamLocal(2)}
-          addPointTeamLocal={() => addPointTeamLocal(2)}
-        />
-      </BoardsContainer>
+      ) : null}
+      <ScrollView>
+        {route.params.online && (
+          <ShareContainer>
+            <ShareSubContainer>
+              <Icon.Button
+                name="copy"
+                backgroundColor="#d8358d"
+                onPress={() => {
+                  copyToIdClipBoard();
+                }}
+              >
+                {route.params.shareId.toUpperCase()}
+              </Icon.Button>
+              {displayCopiedMessage && (
+                <CopiedMessageContainer>
+                  <Triangle />
+                  <CopiedMessage>Copiado!</CopiedMessage>
+                </CopiedMessageContainer>
+              )}
+            </ShareSubContainer>
+          </ShareContainer>
+        )}
+        <BoardsContainer>{teamBoards.map(teamBoard => teamBoard)}</BoardsContainer>
+      </ScrollView>
       <AdBanner />
     </Container>
   );

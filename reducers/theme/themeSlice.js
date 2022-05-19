@@ -10,6 +10,7 @@ const StyledDarkTheme = {
     primary: '#d8358d',
     accent: '#d8358d',
     secondaryBackground: '#1E1E1E',
+    secondaryText: '#7a7a7a',
   },
 };
 
@@ -20,6 +21,7 @@ const StyledLightTheme = {
     primary: '#d8358d',
     accent: '#d8358d',
     secondaryBackground: '#DEDEDE',
+    secondaryText: '#7a7a7a',
   },
 };
 
