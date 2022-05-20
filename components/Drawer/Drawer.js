@@ -21,7 +21,7 @@ const Header = styled.Image`
 const Container = styled.View`
   background-color: ${({theme}) => theme.colors.background};
   padding-top: ${hp(2)}px;
-  height: ${({height}) => height}px;
+  flex: 1;
   padding-bottom: ${({paddingBottom}) => paddingBottom}px;
 `;
 
@@ -60,7 +60,7 @@ const Drawer = ({navigation}) => {
         }}
         height={insets.top + hp(15)}
       />
-      <Container height={hp(100) - (insets.top + hp(15))} paddingBottom={insets.bottom}>
+      <Container paddingBottom={insets.bottom ? insets.bottom : hp(2)}>
         <WidthContainer>
           <DrawerOptionContainer onPress={() => navigation.navigate('Home')}>
             <DrawerOptionText>{t('home')}</DrawerOptionText>

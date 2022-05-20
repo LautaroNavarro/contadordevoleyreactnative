@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import {Platform} from 'react-native';
 import {AdMobBanner} from 'expo-ads-admob';
+import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
 const BannerContainer = styled.View`
   align-items: center;
@@ -9,7 +10,7 @@ const BannerContainer = styled.View`
   width: 100%;
   margin-top: auto;
   padding: 1%;
-  padding-bottom: 1%;
+  padding-bottom: ${hp(2)}px;
 `;
 
 const AdBanner = () => {
